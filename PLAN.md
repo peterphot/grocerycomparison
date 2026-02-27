@@ -74,7 +74,8 @@
     ]
   }
   ```
-- **Key fields**: `DisplayName`, `Price`, `PackageSize`, `CupPrice`, `Brand`, `IsAvailable`
+- **Key fields**: `DisplayName`, `Price`, `PackageSize`, `CupPrice`, `CupMeasure`, `Brand`, `IsAvailable`
+- **Per-unit extraction**: `CupPrice` and `CupMeasure` map directly to `unitPrice` / `unitMeasure` (e.g., `CupPrice: 1.55`, `CupMeasure: "1L"`). Normalise to `unitPricePer100g` by converting the measure to 100ml/100g equivalent.
 - **Notes**: Products are nested inside groups; need to flatten. Price is in dollars (float).
 
 ### 2.2 Coles
@@ -109,7 +110,8 @@
     }
   }
   ```
-- **Key fields**: `name`, `brand`, `description`, `size`, `availability`, `pricing.now`, `pricing.unit.price`
+- **Key fields**: `name`, `brand`, `description`, `size`, `availability`, `pricing.now`, `pricing.unit.price`, `pricing.unit.ofMeasureQuantity`, `pricing.unit.ofMeasureUnits`, `pricing.comparable`
+- **Per-unit extraction**: `pricing.unit.price` is price per `ofMeasureQuantity` `ofMeasureUnits` (e.g., $1.55 per 1L). Use these to compute `unitPrice`, `unitMeasure`, and `unitPricePer100g`. The `pricing.comparable` string (e.g., `"$1.55/ 1L"`) can be used as a fallback display value.
 - **Fallback approach**: If the Next.js data route breaks, can fall back to:
   1. Scrape the subscription key (`BFF_API_SUBSCRIPTION_KEY`) from the homepage HTML
   2. Call the BFF API directly with `Ocp-Apim-Subscription-Key` header
@@ -144,6 +146,7 @@
   }
   ```
 - **Key fields**: `name`, `brandName`, `sellingSize`, `notForSale`, `price.amount` (integer, cents), `price.amountRelevantDisplay`
+- **Per-unit extraction**: The Aldi API does not return a pre-computed unit price. Extract `packageSize` from `sellingSize` (e.g., `"2L"`, `"500g"`), then compute `unitPrice` and `unitPricePer100g` by parsing the size string and dividing `price.amount / 100` accordingly. If `sellingSize` is null or unparseable, set `unitPrice` and `unitPricePer100g` to null.
 - **Notes**: Price is in cents (divide by 100). Filter out items where `notForSale === true`. The `sellingSize` field may be null for some items.
 
 ### 2.4 Harris Farm
@@ -175,16 +178,17 @@
   }
   ```
 - **Key fields**: `title`, `price` (string, dollars), `price_min`, `price_max`, `available`, `tags`
+- **Per-unit extraction**: The Shopify suggest API does not return a pre-computed unit price. Parse `packageSize` from the `title` string using a regex for common size patterns (e.g., `\d+(\.\d+)?\s*(g|kg|ml|L|lb|oz)` — case-insensitive). Compute `unitPrice` and `unitPricePer100g` from the parsed size and price. If size cannot be extracted from the title, set both to null.
 - **Notes**: Price is a string (parse to float). The `suggest` endpoint returns limited results (max ~10). For more thorough search, can also use `/products.json?limit=250` with title filtering, but suggest is faster.
 
 ### 2.5 Summary Table
 
-| Store | Endpoint Type | Auth | Price Format | Size Field | Availability Field |
-|-------|--------------|------|-------------|------------|-------------------|
-| Woolworths | Direct REST API | User-Agent | Float (dollars) | `PackageSize` | `IsAvailable` |
-| Coles | Next.js SSR data | Cookies + buildId | Float (dollars) | `size` | `availability` |
-| Aldi | Direct REST API | User-Agent + Origin/Referer | Integer (cents) | `sellingSize` | `!notForSale` |
-| Harris Farm | Shopify suggest API | User-Agent | String (dollars) | In `title` | `available` |
+| Store | Endpoint Type | Auth | Price Format | Size Field | Display Unit Price Source | Normalised Comparison |
+|-------|--------------|------|-------------|------------|--------------------------|----------------------|
+| Woolworths | Direct REST API | User-Agent | Float (dollars) | `PackageSize` | `CupPrice` / `CupMeasure` verbatim; re-expressed in contextual units | Derived from `CupPrice` + `CupMeasure` |
+| Coles | Next.js SSR data | Cookies + buildId | Float (dollars) | `size` | `pricing.unit.price` / `ofMeasureUnits` verbatim; re-expressed in contextual units | Derived from `pricing.unit` fields |
+| Aldi | Direct REST API | User-Agent + Origin/Referer | Integer (cents) | `sellingSize` | Computed via `unit-price.ts` using contextual unit selection | Computed via `unit-price.ts` to per-100g/100ml |
+| Harris Farm | Shopify suggest API | User-Agent | String (dollars) | Parsed from `title` | Computed via `unit-price.ts` using contextual unit selection | Computed via `unit-price.ts` to per-100g/100ml |
 
 ---
 
@@ -250,8 +254,26 @@ interface ProductMatch {
   brand: string;                 // e.g., "Coles"
   price: number;                 // In dollars (float), e.g., 4.65
   packageSize: string;           // e.g., "3L"
-  unitPrice: number | null;      // Price per unit (e.g., per litre), if available
-  unitMeasure: string | null;    // e.g., "1L"
+
+  // --- Display unit price (what the user sees) ---
+  // Expressed in contextually appropriate units chosen by the adapter or utility:
+  //   - Small weight items (< 1kg): per 100g  e.g., "$0.89 / 100g"
+  //   - Large weight items (>= 1kg): per kg   e.g., "$5.50 / kg"
+  //   - Small volume items (< 1L): per 100ml  e.g., "$0.15 / 100ml"
+  //   - Large volume items (>= 1L): per litre e.g., "$1.55 / L"
+  //   - Count-based items (each, pack): per unit e.g., "$0.25 / each"
+  // For Woolworths + Coles: use the store's pre-computed value verbatim where available
+  // For Aldi + Harris Farm: compute from packageSize using contextually appropriate unit
+  unitPrice: number | null;      // e.g., 0.89
+  unitMeasure: string | null;    // e.g., "100g", "kg", "100ml", "L", "each"
+
+  // --- Normalised comparison price (internal use only, not displayed) ---
+  // Always expressed as: price per 100g for weight items, price per 100ml for volume items
+  // Used solely for sorting / finding the cheapest option across different pack sizes
+  // e.g., a 500g bag at $4.45 and a 1kg bag at $7.50 both normalise to per-100g for comparison
+  // null if unit cannot be resolved to a weight or volume measure (e.g., "each", "pack of 4")
+  unitPriceNormalised: number | null;
+
   available: boolean;
 }
 
@@ -444,6 +466,10 @@ Single-page app with the shopping list form at the top and results below.
 - Desktop: Side-by-side columns (stores + mix-and-match)
 - Mobile: Horizontal scrollable tabs or accordion
 - Each column shows item-by-item prices with "unavailable" markers
+- Each item row shows:
+  - Product name and package size
+  - Total price for the line (price × quantity)
+  - Per-unit cost as a secondary label (e.g., "$1.55 / 100ml" or "$0.89 / 100g") where available — allows value comparison across different pack sizes
 - Store with lowest total is highlighted
 - Mix-and-match column shows which store each item comes from
 
@@ -502,6 +528,7 @@ grocerycomparison/
 │   │   ├── utils/
 │   │   │   ├── http-client.ts       (shared HTTP client with headers)
 │   │   │   ├── rate-limiter.ts
+│   │   │   ├── unit-price.ts        (normalises unit price to per-100g/100ml)
 │   │   │   └── coles-session.ts     (Coles session manager)
 │   │   └── config.ts                (configuration constants)
 │   └── tests/
@@ -596,16 +623,39 @@ Tasks are ordered by dependency. Each task follows TDD: write tests first, then 
 
 ### Phase 3: Backend - Store Adapters
 
-**[T004] Test: HTTP client and rate limiter utilities**
+**[T004] Test: HTTP client, rate limiter, and unit price utilities**
 - Type: Test
 - Test HTTP client makes requests with correct headers
 - Test rate limiter throttles concurrent requests
+- Test unit price utility (two concerns tested separately):
+  - **Display unit** — contextually appropriate unit chosen based on size:
+    - 500g item → displays per 100g (e.g., `$0.89 / 100g`)
+    - 2kg item → displays per kg (e.g., `$5.50 / kg`)
+    - 600ml item → displays per 100ml (e.g., `$0.25 / 100ml`)
+    - 2L item → displays per L (e.g., `$1.55 / L`)
+    - Count-based item → displays per each
+  - **Normalised comparison value** — always per-100g or per-100ml regardless of pack size:
+    - 500g at $4.45 → $0.89 / 100g
+    - 2kg at $11.00 → $0.55 / 100g (same base, enables correct size comparison)
+    - Returns null for count-based units
+  - Handles weight units: g, kg, mg, oz, lb
+  - Handles volume units: ml, L, fl oz
+  - Parses size strings from product titles (e.g., "500g", "1.5L", "2 x 250ml")
 - Dependencies: T003
 
-**[T005] Implement: HTTP client and rate limiter utilities**
+**[T005] Implement: HTTP client, rate limiter, and unit price utilities**
 - Type: Implement
 - Create shared HTTP client (axios or fetch wrapper) with default headers
 - Create per-store rate limiter
+- Create `unit-price.ts` utility with two distinct concerns:
+  1. **Display unit** (contextually appropriate for the human reader):
+     - `parsePackageSize(sizeString: string): { quantity: number; unit: string } | null`
+     - `computeDisplayUnitPrice(price: number, quantity: number, unit: string): { unitPrice: number; unitMeasure: string } | null`
+     - Logic: weight < 1000g → per 100g; weight ≥ 1000g → per kg; volume < 1000ml → per 100ml; volume ≥ 1000ml → per L; count-based → per each
+  2. **Normalised comparison value** (fixed base unit for sorting/cheapest logic):
+     - `computeNormalisedUnitPrice(price: number, quantity: number, unit: string): number | null`
+     - Always returns per-100g for weight, per-100ml for volume, null for count-based
+     - Weight and volume are kept separate (no cross-conversion)
 - Dependencies: T004
 
 **[T006] [P] Test: Woolworths adapter**
