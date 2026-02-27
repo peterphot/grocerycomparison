@@ -1,0 +1,11 @@
+{
+  "feature": "grocery-price-comparison",
+  "tickets": {
+    "enabled": false,
+    "type": null,
+    "team": null,
+    "sourceTicket": null,
+    "mapping": {}
+  },
+  "tasks": {}
+}
