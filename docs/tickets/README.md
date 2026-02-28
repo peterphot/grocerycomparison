@@ -58,3 +58,5 @@ T002 ──► T012 (Comparison Results) ─────────────
 | [T013](backlog/T013-page-integration.md) | Page Integration & API Client | 7 - Integration | — | T014, T015 |
 | [T014](backlog/T014-playwright-e2e.md) | Playwright E2E Tests | 8 - QA | T015 | — |
 | [T015](backlog/T015-error-handling-polish.md) | Error Handling & Polish | 8 - QA | T014 | — |
+| [T016](backlog/T016-e2e-coverage-improvements.md) | E2E Test Coverage Improvements | 9 - QA Hardening | — | — |
+| [T017](backlog/T017-ui-design-alignment.md) | UI Design Alignment | 10 - Polish | — | — |
