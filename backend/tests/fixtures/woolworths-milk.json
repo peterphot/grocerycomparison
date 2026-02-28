@@ -1,0 +1,39 @@
+{
+  "Products": [
+    {
+      "Products": [
+        {
+          "DisplayName": "Woolworths Full Cream Milk 3L",
+          "Price": 4.65,
+          "PackageSize": "3L",
+          "CupPrice": 1.55,
+          "CupMeasure": "1L",
+          "Brand": "Woolworths",
+          "IsAvailable": true
+        },
+        {
+          "DisplayName": "Woolworths Lite Milk 2L",
+          "Price": 3.10,
+          "PackageSize": "2L",
+          "CupPrice": 1.55,
+          "CupMeasure": "1L",
+          "Brand": "Woolworths",
+          "IsAvailable": true
+        }
+      ]
+    },
+    {
+      "Products": [
+        {
+          "DisplayName": "Dairy Farmers Full Cream Milk 1L",
+          "Price": 2.50,
+          "PackageSize": "1L",
+          "CupPrice": 2.50,
+          "CupMeasure": "1L",
+          "Brand": "Dairy Farmers",
+          "IsAvailable": false
+        }
+      ]
+    }
+  ]
+}
