@@ -54,22 +54,22 @@ export class ColesAdapter implements StoreAdapter {
     const results = data.pageProps.searchResults.results;
 
     return results
-      .filter((item) => item._type === 'PRODUCT' && item.availability === true)
+      .filter((item) => item._type === 'PRODUCT' && item.availability === true && item.pricing)
       .map((item) => {
+        const pricing = item.pricing!;
         const pkg = item.size ? parsePackageSize(item.size) : null;
-        const unitPrice = item.pricing?.unit?.price ?? null;
-        const rawUnit = item.pricing?.unit?.ofMeasureUnits ?? null;
+        const unitPrice = pricing.unit?.price ?? null;
+        const rawUnit = pricing.unit?.ofMeasureUnits ?? null;
         const unitMeasure = rawUnit ? normaliseUnitMeasure(rawUnit) : null;
-        const unitPriceNormalised =
-          pkg && item.pricing
-            ? computeNormalisedUnitPrice(item.pricing.now, pkg.qty, pkg.unit)
-            : null;
+        const unitPriceNormalised = pkg
+          ? computeNormalisedUnitPrice(pricing.now, pkg.qty, pkg.unit)
+          : null;
 
         return {
           store: this.storeName,
           productName: item.name,
           brand: item.brand || '',
-          price: item.pricing!.now,
+          price: pricing.now,
           packageSize: item.size || '',
           unitPrice,
           unitMeasure,

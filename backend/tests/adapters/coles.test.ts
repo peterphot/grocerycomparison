@@ -103,4 +103,20 @@ describe('ColesAdapter', () => {
 
     await expect(adapter.searchProduct('milk')).rejects.toThrow(StoreApiError);
   });
+
+  it('isAvailable returns true when session succeeds', async () => {
+    expect(await adapter.isAvailable()).toBe(true);
+  });
+
+  it('isAvailable returns false when session fails', async () => {
+    server.use(
+      http.get('https://www.coles.com.au/', () => {
+        return new HttpResponse('<html></html>', {
+          headers: { 'Content-Type': 'text/html' },
+        });
+      }),
+    );
+    const freshAdapter = new ColesAdapter(new ColesSessionManager());
+    expect(await freshAdapter.isAvailable()).toBe(false);
+  });
 });

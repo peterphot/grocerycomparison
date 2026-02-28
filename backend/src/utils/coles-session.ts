@@ -32,12 +32,13 @@ export class ColesSessionManager {
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
       },
       redirect: 'follow',
+      signal: AbortSignal.timeout(10_000),
     });
     const html = await res.text();
     const match = html.match(/"buildId"\s*:\s*"([^"]+)"/);
     if (!match) throw new Error('Could not extract buildId from Coles homepage');
     this.buildId = match[1];
-    this.cookies = res.headers.get('set-cookie') || '';
+    this.cookies = res.headers.getSetCookie().join('; ');
     this.lastRefreshed = Date.now();
   }
 }
