@@ -10,7 +10,7 @@ interface CacheEntry {
 function buildCacheKey(items: ShoppingListItem[]): string {
   return [...items]
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map((item) => `${item.quantity}×${item.name}`)
+    .map((item) => `${item.quantity}×${item.name}×${item.isBrandSpecific ? 'B' : 'G'}`)
     .join(',');
 }
 
@@ -32,9 +32,10 @@ export class SearchOrchestrator {
     // Fan out: for each adapter, search all items concurrently
     const adapterResults = await Promise.allSettled(
       this.adapters.map(async (adapter) => {
-        const itemResults = await Promise.all(
+        const settled = await Promise.allSettled(
           items.map((item) => adapter.searchProduct(item.name))
         );
+        const itemResults = settled.map((r) => (r.status === 'fulfilled' ? r.value : []));
         return { adapter, itemResults };
       })
     );
