@@ -1,5 +1,5 @@
 {
-  "feature": "grocery-price-comparison",
+  "feature": "backend-cors-testability",
   "tickets": {
     "enabled": false,
     "type": null,
@@ -7,5 +7,8 @@
     "sourceTicket": null,
     "mapping": {}
   },
-  "tasks": {}
+  "tasks": {
+    "T001": { "status": "complete", "completed": "2026-02-28T04:05:00Z" },
+    "T002": { "status": "complete", "completed": "2026-02-28T04:10:00Z" }
+  }
 }

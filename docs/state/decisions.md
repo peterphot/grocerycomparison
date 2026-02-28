@@ -142,3 +142,46 @@ _Captured: 2026-02-27T05:30:00Z_
 - **Why**: All 4 store adapters share the same interface but have no dependencies between them. Writing and implementing them in parallel speeds up the build phase.
 - **Alternatives**: Sequential implementation (slower, no benefit)
 - **Context**: Optimizing task execution order in the plan
+
+---
+
+## Clarify Phase (backend-cors-testability)
+_Captured: 2026-02-28T04:00:00Z_
+
+### D-CLARIFY-010: Single-origin CORS configuration
+- **Who decided**: user
+- **What**: Use a single `FRONTEND_ORIGIN` value for CORS (not comma-separated multi-origin)
+- **Why**: Keep it simple for v1
+- **Alternatives**: Comma-separated list of origins, wildcard
+- **Context**: Asked whether CORS should support multiple origins
+
+### D-CLARIFY-011: Default cors() options only
+- **Who decided**: user
+- **What**: Use `cors({ origin: FRONTEND_ORIGIN })` with no additional options (no credentials, no custom headers)
+- **Why**: No current need for credentials or custom headers
+- **Alternatives**: `credentials: true`, specific allowed methods/headers
+- **Context**: Asked about CORS configuration options
+
+### D-CLARIFY-012: Keep sample test, add new test file
+- **Who decided**: user
+- **What**: Keep `sample.test.ts` unchanged; add supertest tests in a new `app.test.ts` file
+- **Why**: Existing test provides baseline sanity check; new tests belong in their own file
+- **Alternatives**: Replace sample test, merge into one file
+- **Context**: Asked whether to keep or replace the sample test
+
+## Orchestrate Phase (backend-cors-testability)
+_Captured: 2026-02-28T04:00:00Z_
+
+### D-ORCH-003: SMALL scale assessment for backend-cors-testability
+- **Who decided**: claude
+- **What**: Assessed this fix as SMALL scale (2 tightly-scoped tasks)
+- **Why**: Both issues are well-defined with clear scope: wire up CORS middleware and split app/server. No new features, no architecture changes, minimal files affected.
+- **Alternatives**: MEDIUM (would overestimate; this is a targeted fix)
+- **Context**: Scale assessment for the backend CORS and testability fix
+
+### D-ORCH-004: STANDARD sequential pattern for backend-cors-testability
+- **Who decided**: claude
+- **What**: Use STANDARD sequential orchestration (no parallelism needed)
+- **Why**: Only 2 tasks and they are tightly coupled (the app/server split must happen before or alongside CORS wiring). No benefit to parallel execution.
+- **Alternatives**: PARALLEL (unnecessary for 2 dependent tasks)
+- **Context**: Selecting orchestration pattern for a small fix
