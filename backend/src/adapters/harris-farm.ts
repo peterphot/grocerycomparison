@@ -40,19 +40,17 @@ export class HarrisFarmAdapter implements StoreAdapter {
 
   private mapProduct(p: ShopifyProduct): ProductMatch {
     const price = parseFloat(p.price);
+    const sizeMatch = p.title.match(/(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i);
     const parsed = parsePackageSize(p.title);
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
-
-    const sizeMatch = p.title.match(/(\d+(?:\.\d+)?\s*(?:g|kg|ml|L))\b/i);
-    const packageSize = sizeMatch ? sizeMatch[1] : '';
 
     return {
       store: this.storeName,
       productName: p.title,
       brand: p.vendor === 'HFM' ? 'Harris Farm' : p.vendor,
       price,
-      packageSize,
+      packageSize: sizeMatch ? `${sizeMatch[1]}${sizeMatch[2]}` : '',
       unitPrice: display?.unitPrice ?? null,
       unitMeasure: display?.unitMeasure ?? null,
       unitPriceNormalised: normalised,
