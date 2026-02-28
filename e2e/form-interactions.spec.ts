@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-test.use({ viewport: { width: 1440, height: 900 } });
+import { fillItem } from './helpers/shopping';
 
 test.describe('Form Interactions', () => {
   test('Journey 4: add items, remove item, minimum 1 enforced', async ({ page }) => {
@@ -44,11 +43,11 @@ test.describe('Form Interactions', () => {
     await expect(compareButton).toBeDisabled();
 
     // Type an item name
-    await page.getByPlaceholder('e.g. milk 2L').first().fill('milk');
+    await fillItem(page, 0, 'milk');
     await expect(compareButton).toBeEnabled();
 
     // Clear the name
-    await page.getByPlaceholder('e.g. milk 2L').first().fill('');
+    await fillItem(page, 0, '');
     await expect(compareButton).toBeDisabled();
   });
 });

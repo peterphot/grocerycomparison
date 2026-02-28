@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { fillItem, clickCompare, storeColumn } from './helpers/shopping';
-
-test.use({ viewport: { width: 1440, height: 900 } });
+import { fillItem, clickCompare, waitForResults, storeColumn } from './helpers/shopping';
 
 test.describe('Error States', () => {
   test('Journey 5: backend 500 shows error banner with Try Again', async ({ page }) => {
@@ -66,10 +64,10 @@ test.describe('Error States', () => {
     await fillItem(page, 1, 'bread');
 
     await clickCompare(page);
-    await expect(page.getByText('Best single store:')).toBeVisible();
+    await waitForResults(page);
 
     // Scope assertion to the Aldi column
-    const aldi = storeColumn(page, 'Aldi');
+    const aldi = storeColumn(page, 'aldi');
     await expect(aldi.getByText('Not available')).toBeVisible();
   });
 });

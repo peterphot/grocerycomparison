@@ -13,6 +13,7 @@ export function StoreColumn({ storeTotal, isCheapest }: StoreColumnProps) {
     <ResultColumn
       header={<StoreHeader storeName={storeTotal.storeName} store={storeTotal.store} isCheapest={isCheapest} />}
       total={storeTotal.total}
+      data-testid={`store-column-${storeTotal.store}`}
     >
       {storeTotal.items.map((item) => (
         <ItemRow key={item.shoppingListItemId} match={item.match} lineTotal={item.lineTotal} />

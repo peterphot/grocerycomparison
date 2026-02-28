@@ -1,8 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { fillItem, clickCompare, waitForResults, storeColumn } from './helpers/shopping';
 
-test.use({ viewport: { width: 1440, height: 900 } });
-
 test.describe('Desktop Comparison', () => {
   test('Journey 1: type items and see results with 5 columns', async ({ page }) => {
     await page.goto('/');
@@ -84,7 +82,7 @@ test.describe('Desktop Comparison', () => {
     await waitForResults(page);
 
     // Woolworths milk: $3.50 * 3 = $10.50 — scope to the Woolworths column
-    const woolworths = storeColumn(page, 'Woolworths');
+    const woolworths = storeColumn(page, 'woolworths');
     await expect(woolworths.getByText('$10.50')).toBeVisible();
   });
 });

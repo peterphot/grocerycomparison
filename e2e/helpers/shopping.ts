@@ -37,9 +37,8 @@ export async function waitForResults(page: Page): Promise<void> {
 }
 
 /**
- * Get a locator scoped to a specific store's result column.
- * Finds the rounded card column that contains the given store header text.
+ * Get a locator scoped to a specific store's result column by test ID.
  */
-export function storeColumn(page: Page, storeName: string): Locator {
-  return page.locator('.rounded-xl').filter({ hasText: storeName });
+export function storeColumn(page: Page, storeKey: string): Locator {
+  return page.getByTestId(`store-column-${storeKey}`);
 }

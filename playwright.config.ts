@@ -11,8 +11,9 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'NEXT_PUBLIC_API_URL=http://localhost:4001 npm run dev --workspace=frontend',
+      command: 'npm run dev --workspace=frontend',
       url: 'http://localhost:3000',
+      env: { NEXT_PUBLIC_API_URL: 'http://localhost:4001' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

@@ -1,12 +1,12 @@
 import type {
   ComparisonResponse,
   ProductMatch,
+  StoreName,
   StoreTotal,
   StoreItemResult,
   MixAndMatchItem,
 } from '@grocery/shared';
-
-type StoreName = 'woolworths' | 'coles' | 'aldi' | 'harrisfarm';
+import { STORE_DISPLAY_NAMES } from '@grocery/shared';
 
 interface ProductDef {
   productName: string;
@@ -17,13 +17,6 @@ interface ProductDef {
   unitMeasure: string | null;
   unitPriceNormalised: number | null;
 }
-
-const STORE_DISPLAY: Record<StoreName, string> = {
-  woolworths: 'Woolworths',
-  coles: 'Coles',
-  aldi: 'Aldi',
-  harrisfarm: 'Harris Farm',
-};
 
 function makeProduct(store: StoreName, def: ProductDef): ProductMatch {
   return {
@@ -61,7 +54,7 @@ function makeStoreTotal(
   const unavailableCount = items.filter((i) => !i.match).length;
   return {
     store,
-    storeName: STORE_DISPLAY[store],
+    storeName: STORE_DISPLAY_NAMES[store],
     items,
     total: items.reduce((sum, i) => sum + i.lineTotal, 0),
     unavailableCount,
@@ -93,7 +86,7 @@ const MILK: Record<StoreName, ProductDef> = {
   harrisfarm: { productName: 'Harris Farm Full Cream Milk 2L', brand: 'Harris Farm', price: 4.20, packageSize: '2L', unitPrice: 2.10, unitMeasure: 'L', unitPriceNormalised: 0.21 },
 };
 
-const BREAD: Record<string, ProductDef> = {
+const BREAD: Partial<Record<StoreName, ProductDef>> = {
   woolworths: { productName: 'Woolworths White Bread 700g', brand: 'Woolworths', price: 3.80, packageSize: '700g', unitPrice: 0.54, unitMeasure: '100g', unitPriceNormalised: 0.54 },
   coles: { productName: 'Coles White Bread 700g', brand: 'Coles', price: 3.50, packageSize: '700g', unitPrice: 0.50, unitMeasure: '100g', unitPriceNormalised: 0.50 },
   // Aldi: bread unavailable (null match)
@@ -106,11 +99,11 @@ export const defaultResponse: ComparisonResponse = {
   storeTotals: [
     makeStoreTotal('woolworths', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('woolworths', MILK.woolworths)),
-      makeStoreItem('item-2', 'bread', 1, makeProduct('woolworths', BREAD.woolworths)),
+      makeStoreItem('item-2', 'bread', 1, makeProduct('woolworths', BREAD.woolworths!)),
     ]),
     makeStoreTotal('coles', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('coles', MILK.coles)),
-      makeStoreItem('item-2', 'bread', 1, makeProduct('coles', BREAD.coles)),
+      makeStoreItem('item-2', 'bread', 1, makeProduct('coles', BREAD.coles!)),
     ]),
     makeStoreTotal('aldi', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('aldi', MILK.aldi)),
@@ -118,15 +111,15 @@ export const defaultResponse: ComparisonResponse = {
     ]),
     makeStoreTotal('harrisfarm', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('harrisfarm', MILK.harrisfarm)),
-      makeStoreItem('item-2', 'bread', 1, makeProduct('harrisfarm', BREAD.harrisfarm)),
+      makeStoreItem('item-2', 'bread', 1, makeProduct('harrisfarm', BREAD.harrisfarm!)),
     ]),
   ],
   mixAndMatch: {
     items: [
       makeMixItem('item-1', 'milk', 1, makeProduct('aldi', MILK.aldi)),
-      makeMixItem('item-2', 'bread', 1, makeProduct('coles', BREAD.coles)),
+      makeMixItem('item-2', 'bread', 1, makeProduct('coles', BREAD.coles!)),
     ],
-    total: MILK.aldi.price + BREAD.coles.price,
+    total: MILK.aldi.price + BREAD.coles!.price,
   },
   searchResults: [],
 };
