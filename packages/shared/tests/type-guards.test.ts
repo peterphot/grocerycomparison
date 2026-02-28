@@ -160,6 +160,51 @@ describe('isShoppingListItem', () => {
   it('returns false for an empty object', () => {
     expect(isShoppingListItem({})).toBe(false);
   });
+
+  it('returns false when name is empty string', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), name: '' })).toBe(false);
+  });
+
+  it('returns false when name is whitespace only', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), name: '   ' })).toBe(false);
+  });
+
+  it('returns false when name exceeds 200 characters', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), name: 'a'.repeat(201) })).toBe(false);
+  });
+
+  it('accepts name at exactly 200 characters', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), name: 'a'.repeat(200) })).toBe(true);
+  });
+
+  it('returns false when quantity is zero', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: 0 })).toBe(false);
+  });
+
+  it('returns false when quantity is negative', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: -1 })).toBe(false);
+  });
+
+  it('returns false when quantity exceeds 999', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: 1000 })).toBe(false);
+  });
+
+  it('returns false when quantity is Infinity', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: Infinity })).toBe(false);
+  });
+
+  it('returns false when quantity is NaN', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: NaN })).toBe(false);
+  });
+
+  it('returns false when quantity is a decimal', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: 1.5 })).toBe(false);
+  });
+
+  it('accepts quantity at boundary values (1 and 999)', () => {
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: 1 })).toBe(true);
+    expect(isShoppingListItem({ ...validShoppingListItem(), quantity: 999 })).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------

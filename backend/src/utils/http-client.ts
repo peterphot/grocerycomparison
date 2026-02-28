@@ -36,7 +36,7 @@ async function fetchWithRetry<T>(
     const res = await fetch(url, {
       headers: mergedHeaders,
       signal: controller.signal,
-      redirect: 'error',
+      redirect: 'follow',
     });
 
     if (!res.ok) {

@@ -22,7 +22,7 @@ export class WoolworthsAdapter implements StoreAdapter {
   readonly displayName = 'Woolworths';
 
   async searchProduct(query: string): Promise<ProductMatch[]> {
-    const url = `https://www.woolworths.com.au/apis/ui/Search/products?searchTerm=${encodeURIComponent(query)}&pageSize=24`;
+    const url = `https://www.woolworths.com.au/apis/ui/Search/products?searchTerm=${encodeURIComponent(query)}&pageSize=10`;
     const data = await httpGet<WoolworthsResponse>(url, { store: this.storeName });
     const products = (data.Products || []).flatMap(group => group.Products || []);
     return products.filter(p => p.IsAvailable).map(p => this.mapProduct(p));

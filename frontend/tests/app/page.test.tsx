@@ -93,9 +93,9 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: /compare prices/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Coles')).toBeInTheDocument();
+      expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
     });
-    expect(screen.getByText('Woolworths')).toBeInTheDocument();
+    expect(screen.getAllByText('Woolworths').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders error banner when search fails', async () => {
@@ -150,9 +150,33 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: /try again/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Coles')).toBeInTheDocument();
+      expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
     });
     expect(callCount).toBe(2);
+  });
+
+  it('keeps form visible alongside results after search', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.post('http://localhost:4000/api/search', () => {
+        return HttpResponse.json(mockComparisonResponse);
+      }),
+    );
+
+    render(<Home />);
+
+    const nameInput = screen.getByPlaceholderText('e.g. milk 2L');
+    await user.type(nameInput, 'milk');
+    await user.click(screen.getByRole('button', { name: /compare prices/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
+    });
+
+    // Form should still be visible alongside results
+    expect(screen.getByPlaceholderText('e.g. milk 2L')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /compare prices/i })).toBeInTheDocument();
   });
 
   it('clicking Edit List returns to form view', async () => {
@@ -171,7 +195,7 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: /compare prices/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Coles')).toBeInTheDocument();
+      expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
     });
 
     await user.click(screen.getByRole('button', { name: /edit list/i }));

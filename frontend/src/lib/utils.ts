@@ -14,7 +14,9 @@ export function formatUnitPrice(unitPrice: number, unitMeasure: string): string 
 }
 
 export function findCheapestStore(storeTotals: StoreTotal[]): StoreTotal {
-  const fullyAvailable = storeTotals.filter(st => st.allItemsAvailable);
-  const pool = fullyAvailable.length > 0 ? fullyAvailable : storeTotals;
+  const withResults = storeTotals.filter(st => st.total > 0);
+  if (withResults.length === 0) return storeTotals[0];
+  const fullyAvailable = withResults.filter(st => st.allItemsAvailable);
+  const pool = fullyAvailable.length > 0 ? fullyAvailable : withResults;
   return pool.reduce((min, st) => (st.total < min.total ? st : min), pool[0]);
 }

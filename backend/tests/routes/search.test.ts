@@ -93,6 +93,74 @@ describe('POST /api/search', () => {
     expect(res.body).toEqual({ error: 'Invalid item at index 0' });
   });
 
+  it('returns 400 when an item has an empty name', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: [{ id: '1', name: '', quantity: 1, isBrandSpecific: false }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 0' });
+  });
+
+  it('returns 400 when an item has a whitespace-only name', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: [{ id: '1', name: '   ', quantity: 1, isBrandSpecific: false }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 0' });
+  });
+
+  it('returns 400 when any item in the list has an empty name', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({
+        items: [
+          { id: '1', name: 'Milk', quantity: 1, isBrandSpecific: false },
+          { id: '2', name: '', quantity: 1, isBrandSpecific: false },
+        ],
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 1' });
+  });
+
+  it('returns 400 when item name exceeds 200 characters', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: [{ id: '1', name: 'a'.repeat(201), quantity: 1, isBrandSpecific: false }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 0' });
+  });
+
+  it('returns 400 when quantity is zero', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: [{ id: '1', name: 'Milk', quantity: 0, isBrandSpecific: false }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 0' });
+  });
+
+  it('returns 400 when quantity exceeds 999', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: [{ id: '1', name: 'Milk', quantity: 1000, isBrandSpecific: false }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 0' });
+  });
+
+  it('returns 400 when quantity is a decimal', async () => {
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: [{ id: '1', name: 'Milk', quantity: 1.5, isBrandSpecific: false }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid item at index 0' });
+  });
+
   it('returns 500 when orchestrator throws unexpected error', async () => {
     mockSearch.mockRejectedValue(new Error('Something broke'));
 

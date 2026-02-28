@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
 import { mockComparisonResponse } from '../fixtures/comparison-response';
 import { ComparisonResults } from '../../src/components/results/ComparisonResults';
 import { StoreColumn } from '../../src/components/results/StoreColumn';
@@ -12,15 +13,16 @@ import { formatPrice, formatUnitPrice, findCheapestStore } from '../../src/lib/u
 describe('ComparisonResults', () => {
   it('renders a column for each store', () => {
     render(<ComparisonResults response={mockComparisonResponse} />);
-    expect(screen.getByText('Coles')).toBeInTheDocument();
-    expect(screen.getByText('Woolworths')).toBeInTheDocument();
-    expect(screen.getByText('Harris Farm')).toBeInTheDocument();
-    expect(screen.getByText('Aldi')).toBeInTheDocument();
+    // Both mobile tabs and desktop grid render in jsdom, so use getAllByText
+    expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Woolworths').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Harris Farm').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Aldi').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders mix-and-match column', () => {
     render(<ComparisonResults response={mockComparisonResponse} />);
-    expect(screen.getByText('Mix & Match')).toBeInTheDocument();
+    expect(screen.getAllByText('Mix & Match').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows cheapest fully-available store in banner', () => {
@@ -55,9 +57,61 @@ describe('ComparisonResults', () => {
       storeTotals: mockComparisonResponse.storeTotals.slice(0, 2),
     };
     const { container } = render(<ComparisonResults response={twoStores} />);
-    const grid = container.querySelector('[style]');
+    // The desktop grid has the style attribute with grid-template-columns
+    const grids = container.querySelectorAll('[style]');
+    const desktopGrid = Array.from(grids).find(
+      (el) => el.getAttribute('style')?.includes('grid-template-columns'),
+    );
+    expect(desktopGrid).toBeTruthy();
     // 2 stores + 1 mix-and-match = 3 columns
-    expect(grid).toHaveStyle({ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' });
+    expect(desktopGrid).toHaveStyle({ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' });
+  });
+
+  it('hides best store banner when all stores have $0.00 total', () => {
+    const allZero = {
+      ...mockComparisonResponse,
+      storeTotals: mockComparisonResponse.storeTotals.map(st => ({
+        ...st,
+        total: 0,
+        unavailableCount: st.items.length,
+        allItemsAvailable: false,
+        items: st.items.map(item => ({ ...item, match: null, lineTotal: 0 })),
+      })),
+    };
+    render(<ComparisonResults response={allZero} />);
+    expect(screen.queryByText(/Best single store/)).not.toBeInTheDocument();
+    expect(screen.getByText(/No results found/i)).toBeInTheDocument();
+  });
+
+  it('renders mobile tab buttons for each store', () => {
+    const { container } = render(<ComparisonResults response={mockComparisonResponse} />);
+    const mobileTabList = container.querySelector('[data-testid="mobile-store-tabs"]');
+    expect(mobileTabList).toBeInTheDocument();
+  });
+
+  it('renders mobile tabs with store names', async () => {
+    render(<ComparisonResults response={mockComparisonResponse} />);
+    const tabList = screen.getByTestId('mobile-store-tabs');
+    // Tab buttons should have all store names
+    expect(tabList).toHaveTextContent('Coles');
+    expect(tabList).toHaveTextContent('Woolworths');
+    expect(tabList).toHaveTextContent('Aldi');
+    expect(tabList).toHaveTextContent('Harris Farm');
+    expect(tabList).toHaveTextContent('Mix & Match');
+  });
+
+  it('switches visible store on mobile tab click', async () => {
+    const user = userEvent.setup();
+    render(<ComparisonResults response={mockComparisonResponse} />);
+    const tabList = screen.getByTestId('mobile-store-tabs');
+    const woolworthsTab = Array.from(tabList.querySelectorAll('button')).find(
+      (btn) => btn.textContent?.includes('Woolworths'),
+    );
+    expect(woolworthsTab).toBeDefined();
+    await user.click(woolworthsTab!);
+    // After clicking Woolworths tab, the mobile panel should show Woolworths data
+    const mobilePanel = screen.getByTestId('mobile-store-panel');
+    expect(mobilePanel).toHaveTextContent('Woolworths Full Cream Milk 2L');
   });
 });
 
@@ -65,6 +119,29 @@ describe('ItemRow', () => {
   const availableItem = mockComparisonResponse.storeTotals[0].items[0]; // Coles milk, has unitPrice
   const unavailableItem = mockComparisonResponse.storeTotals[3].items[2]; // Aldi eggs, match null
   const noUnitPriceItem = mockComparisonResponse.storeTotals[0].items[2]; // Coles eggs, unitPrice null
+
+  it('shows shopping list item name as label', () => {
+    render(
+      <ItemRow
+        match={availableItem.match}
+        lineTotal={availableItem.lineTotal}
+        shoppingListItemName="milk 2L"
+      />,
+    );
+    expect(screen.getByText('milk 2L')).toBeInTheDocument();
+  });
+
+  it('shows shopping list item name for unavailable items', () => {
+    render(
+      <ItemRow
+        match={unavailableItem.match}
+        lineTotal={unavailableItem.lineTotal}
+        shoppingListItemName="eggs"
+      />,
+    );
+    expect(screen.getByText('eggs')).toBeInTheDocument();
+    expect(screen.getByText('Not available')).toBeInTheDocument();
+  });
 
   it('shows product name for available item', () => {
     render(<ItemRow match={availableItem.match} lineTotal={availableItem.lineTotal} />);
@@ -95,6 +172,7 @@ describe('ItemRow', () => {
 
 describe('StoreColumn', () => {
   const colesStore = mockComparisonResponse.storeTotals[0];
+  const aldiStore = mockComparisonResponse.storeTotals[3]; // has 1 unavailable item
 
   it('renders store name in header', () => {
     render(<StoreColumn storeTotal={colesStore} isCheapest={false} />);
@@ -111,6 +189,16 @@ describe('StoreColumn', () => {
   it('renders store total', () => {
     render(<StoreColumn storeTotal={colesStore} isCheapest={false} />);
     expect(screen.getByText('$15.60')).toBeInTheDocument();
+  });
+
+  it('does not show unavailable count when all items are available', () => {
+    render(<StoreColumn storeTotal={colesStore} isCheapest={false} />);
+    expect(screen.queryByText(/items? unavailable/)).not.toBeInTheDocument();
+  });
+
+  it('shows unavailable count when some items are unavailable', () => {
+    render(<StoreColumn storeTotal={aldiStore} isCheapest={false} />);
+    expect(screen.getByText('1 item unavailable')).toBeInTheDocument();
   });
 });
 
@@ -151,6 +239,14 @@ describe('StoreHeader', () => {
   it('renders store name', () => {
     render(<StoreHeader storeName="Coles" store="coles" isCheapest={false} />);
     expect(screen.getByText('Coles')).toBeInTheDocument();
+  });
+
+  it('renders full Woolworths name without truncation', () => {
+    render(<StoreHeader storeName="Woolworths" store="woolworths" isCheapest={false} />);
+    expect(screen.getByText('Woolworths')).toBeInTheDocument();
+    // The element should contain the full text, not be truncated via CSS overflow
+    const header = screen.getByText('Woolworths');
+    expect(header.className).not.toContain('truncate');
   });
 
   it('applies brand colour as background', () => {
