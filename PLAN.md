@@ -178,7 +178,7 @@
   }
   ```
 - **Key fields**: `title`, `price` (string, dollars), `price_min`, `price_max`, `available`, `tags`
-- **Per-unit extraction**: The Shopify suggest API does not return a pre-computed unit price. Parse `packageSize` from the `title` string using a regex for common size patterns (e.g., `\d+(\.\d+)?\s*(g|kg|ml|L|lb|oz)` — case-insensitive). Compute `unitPrice` and `unitPricePer100g` from the parsed size and price. If size cannot be extracted from the title, set both to null.
+- **Per-unit extraction**: The Shopify suggest API does not return a pre-computed unit price. Parse `packageSize` from the `title` string using a regex for metric size patterns (e.g., `\d+(\.\d+)?\s*(g|kg|ml|L)` — case-insensitive). Metric units only (g, kg, ml, L) — no imperial units (this is an Australian product). Compute `unitPrice` and `unitPricePer100g` from the parsed size and price. If size cannot be extracted from the title, set both to null.
 - **Notes**: Price is a string (parse to float). The `suggest` endpoint returns limited results (max ~10). For more thorough search, can also use `/products.json?limit=250` with title filtering, but suggest is faster.
 
 ### 2.5 Summary Table
@@ -638,8 +638,8 @@ Tasks are ordered by dependency. Each task follows TDD: write tests first, then 
     - 500g at $4.45 → $0.89 / 100g
     - 2kg at $11.00 → $0.55 / 100g (same base, enables correct size comparison)
     - Returns null for count-based units
-  - Handles weight units: g, kg, mg, oz, lb
-  - Handles volume units: ml, L, fl oz
+  - Handles metric weight units: g, kg (no imperial — Australian market, metric only)
+  - Handles metric volume units: ml, L (no imperial — Australian market, metric only)
   - Parses size strings from product titles (e.g., "500g", "1.5L", "2 x 250ml")
 - Dependencies: T003
 

@@ -59,9 +59,8 @@ Implement the three foundational backend utilities shared by all store adapters:
 ### Size String Parsing
 - [ ] Parses: `"500g"`, `"2kg"`, `"1.5L"`, `"600ml"`, `"2 x 250ml"`, `"380g"`
 - [ ] Handles case-insensitive units: `"500G"`, `"2KG"`, `"1.5l"`
-- [ ] Handles imperial units: `"16oz"` → g, `"1lb"` → g, `"2 fl oz"` → ml
-- [ ] Returns `null` for: `""`, `"pack of 4"`, `"each"`, `"assorted"`
-- [ ] Unit conversions: kg→g (×1000), L→ml (×1000), oz→g (×28.35), lb→g (×453.592), fl oz→ml (×29.574)
+- [ ] Returns `null` for: `""`, `"pack of 4"`, `"each"`, `"assorted"`, `"16oz"`, `"1lb"` (imperial not supported)
+- [ ] Unit conversions: kg→g (×1000), L→ml (×1000). Metric only — no imperial units (Australian market)
 
 ---
 

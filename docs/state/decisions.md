@@ -185,3 +185,13 @@ _Captured: 2026-02-28T04:00:00Z_
 - **Why**: Only 2 tasks and they are tightly coupled (the app/server split must happen before or alongside CORS wiring). No benefit to parallel execution.
 - **Alternatives**: PARALLEL (unnecessary for 2 dependent tasks)
 - **Context**: Selecting orchestration pattern for a small fix
+
+## Constraint Decisions
+_Captured: 2026-02-28_
+
+### D-CONSTRAINT-001: Metric units only — no imperial
+- **Who decided**: user
+- **What**: All unit handling must use metric system only (g, kg, ml, L). No support for imperial units (oz, lb, fl oz).
+- **Why**: This is an Australian product for Australian users. Australia uses the metric system exclusively. Imperial units add unnecessary complexity and are not used by Australian supermarkets.
+- **Alternatives**: Support both metric and imperial (rejected — unnecessary for AU market)
+- **Context**: User directive during PR #5 review. Affects unit-price.ts, all store adapters, and any size-string parsing.

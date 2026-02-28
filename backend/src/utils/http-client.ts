@@ -39,6 +39,8 @@ async function fetchWithRetry<T>(
 
     if (!res.ok) {
       const isRetryable = res.status >= 500;
+      // Drain body to free the underlying socket for reuse
+      await res.body?.cancel().catch(() => {});
       if (isRetryable && retries > 0) {
         await delay(RETRY_DELAY_MS);
         return fetchWithRetry<T>(url, options, retries - 1);
