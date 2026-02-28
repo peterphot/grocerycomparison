@@ -18,11 +18,17 @@ describe('ShoppingListForm', () => {
     expect(nameInputs).toHaveLength(1);
   });
 
-  it('renders column headers', () => {
+  it('renders form title and subtitle (S2)', () => {
+    render(<ShoppingListForm onSubmit={vi.fn()} />);
+    expect(screen.getByText('My Shopping List')).toBeInTheDocument();
+    expect(screen.getByText('Enter items to compare prices across stores')).toBeInTheDocument();
+  });
+
+  it('renders column headers in sentence case (M2)', () => {
     render(<ShoppingListForm onSubmit={vi.fn()} />);
     expect(screen.getByText('Item')).toBeInTheDocument();
     expect(screen.getByText('Qty')).toBeInTheDocument();
-    expect(screen.getByText('Brand?')).toBeInTheDocument();
+    expect(screen.getByText('Preference')).toBeInTheDocument();
   });
 
   it('typing in name field updates item', async () => {
@@ -33,10 +39,10 @@ describe('ShoppingListForm', () => {
     expect(nameInput).toHaveValue('milk 2L');
   });
 
-  it('clicking Add Item adds a new row', async () => {
+  it('clicking Add another item adds a new row (M1)', async () => {
     const user = userEvent.setup();
     render(<ShoppingListForm onSubmit={vi.fn()} />);
-    const addButton = screen.getByRole('button', { name: /add item/i });
+    const addButton = screen.getByRole('button', { name: /add another item/i });
     await user.click(addButton);
     const nameInputs = screen.getAllByPlaceholderText('e.g. milk 2L');
     expect(nameInputs).toHaveLength(2);
@@ -46,7 +52,7 @@ describe('ShoppingListForm', () => {
     const user = userEvent.setup();
     render(<ShoppingListForm onSubmit={vi.fn()} />);
     // Add a second item
-    await user.click(screen.getByRole('button', { name: /add item/i }));
+    await user.click(screen.getByRole('button', { name: /add another item/i }));
     expect(screen.getAllByPlaceholderText('e.g. milk 2L')).toHaveLength(2);
     // Remove the first item
     const removeButtons = screen.getAllByRole('button', { name: /remove/i });
@@ -87,7 +93,7 @@ describe('ShoppingListForm', () => {
     const onSubmit = vi.fn();
     render(<ShoppingListForm onSubmit={onSubmit} />);
     // Add a second item
-    await user.click(screen.getByRole('button', { name: /add item/i }));
+    await user.click(screen.getByRole('button', { name: /add another item/i }));
     const nameInputs = screen.getAllByPlaceholderText('e.g. milk 2L');
     // Fill only the first item
     await user.type(nameInputs[0], 'milk');
@@ -100,16 +106,15 @@ describe('ShoppingListForm', () => {
     expect(submittedItems[0]).toMatchObject({ name: 'milk' });
   });
 
-  it('toggling brand checkbox updates item', async () => {
+  it('toggling brand preference uses segmented toggle (S3)', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
     render(<ShoppingListForm onSubmit={onSubmit} />);
     const nameInput = screen.getByPlaceholderText('e.g. milk 2L');
     await user.type(nameInput, 'oat milk');
-    const brandCheckbox = screen.getByRole('checkbox', { name: /brand matters/i });
-    expect(brandCheckbox).not.toBeChecked();
-    await user.click(brandCheckbox);
-    expect(brandCheckbox).toBeChecked();
+    // Brand toggle should have "Any brand" and "Brand only" buttons
+    const brandOnlyBtn = screen.getByRole('button', { name: /brand only/i });
+    await user.click(brandOnlyBtn);
     // Verify the toggled state is included in submit
     await user.click(screen.getByRole('button', { name: /compare prices/i }));
     expect(onSubmit).toHaveBeenCalledWith(
@@ -117,5 +122,10 @@ describe('ShoppingListForm', () => {
         expect.objectContaining({ name: 'oat milk', isBrandSpecific: true }),
       ])
     );
+  });
+
+  it('hint text below Compare button (M4)', () => {
+    render(<ShoppingListForm onSubmit={vi.fn()} />);
+    expect(screen.getByText(/toggle brand preference/i)).toBeInTheDocument();
   });
 });

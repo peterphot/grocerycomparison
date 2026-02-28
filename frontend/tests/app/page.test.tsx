@@ -31,6 +31,11 @@ describe('Header', () => {
     render(<Home />);
     expect(screen.getByText('Beta')).toBeInTheDocument();
   });
+
+  it('renders Help link (M5)', () => {
+    render(<Home />);
+    expect(screen.getByText('Help')).toBeInTheDocument();
+  });
 });
 
 describe('HomePage', () => {
@@ -41,19 +46,30 @@ describe('HomePage', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows empty state illustration before first search', () => {
+  it('shows empty state with redesigned content (S1)', () => {
     render(<Home />);
     expect(
-      screen.getByText('Compare prices in seconds'),
+      screen.getByText('Start comparing prices'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Add items to your list and click Compare Prices'),
+      screen.getByText(/Add items to your shopping list/),
     ).toBeInTheDocument();
+    // Should show store badges
+    expect(screen.getByText('Woolworths')).toBeInTheDocument();
+    expect(screen.getByText('Coles')).toBeInTheDocument();
+    expect(screen.getByText('Aldi')).toBeInTheDocument();
+    expect(screen.getByText('Harris Farm')).toBeInTheDocument();
   });
 
   it('renders Header on all states', () => {
     render(<Home />);
     expect(screen.getByText('GroceryCompare')).toBeInTheDocument();
+  });
+
+  it('has page background color (M6)', () => {
+    const { container } = render(<Home />);
+    const main = container.querySelector('main');
+    expect(main?.className).toContain('bg-[#F6FAF6]');
   });
 
   it('shows loading skeleton while search is in-flight', async () => {
@@ -179,7 +195,7 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: /compare prices/i })).toBeInTheDocument();
   });
 
-  it('clicking Edit List returns to form view', async () => {
+  it('clicking Edit list returns to form view', async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -198,7 +214,9 @@ describe('HomePage', () => {
       expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
     });
 
-    await user.click(screen.getByRole('button', { name: /edit list/i }));
+    // Edit list button in the SummaryPanel (desktop) or Header (mobile)
+    const editButtons = screen.getAllByRole('button', { name: /edit list/i });
+    await user.click(editButtons[0]);
 
     expect(
       screen.getByRole('button', { name: /compare prices/i }),

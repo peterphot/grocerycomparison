@@ -11,7 +11,14 @@ interface StoreColumnProps {
 export function StoreColumn({ storeTotal, isCheapest }: StoreColumnProps) {
   return (
     <ResultColumn
-      header={<StoreHeader storeName={storeTotal.storeName} store={storeTotal.store} isCheapest={isCheapest} />}
+      header={
+        <StoreHeader
+          storeName={storeTotal.storeName}
+          store={storeTotal.store}
+          isCheapest={isCheapest}
+          total={storeTotal.total}
+        />
+      }
       total={storeTotal.total}
       data-testid={`store-column-${storeTotal.store}`}
     >
@@ -21,6 +28,7 @@ export function StoreColumn({ storeTotal, isCheapest }: StoreColumnProps) {
           match={item.match}
           lineTotal={item.lineTotal}
           shoppingListItemName={item.shoppingListItemName}
+          quantity={item.quantity}
         />
       ))}
       {storeTotal.unavailableCount > 0 && (
