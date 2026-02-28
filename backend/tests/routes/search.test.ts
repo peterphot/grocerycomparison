@@ -68,6 +68,22 @@ describe('POST /api/search', () => {
     expect(res.body).toEqual({ error: 'items must be a non-empty array' });
   });
 
+  it('returns 400 when items exceed max limit', async () => {
+    const tooManyItems = Array.from({ length: 51 }, (_, i) => ({
+      id: String(i),
+      name: `Item ${i}`,
+      quantity: 1,
+      isBrandSpecific: false,
+    }));
+
+    const res = await request(app)
+      .post('/api/search')
+      .send({ items: tooManyItems });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Too many items (max 50)' });
+  });
+
   it('returns 400 when an item is missing required fields', async () => {
     const res = await request(app)
       .post('/api/search')

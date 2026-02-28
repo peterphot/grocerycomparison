@@ -14,6 +14,11 @@ export function createSearchRouter(orchestrator: SearchOrchestrator): Router {
         return;
       }
 
+      if (items.length > 50) {
+        res.status(400).json({ error: 'Too many items (max 50)' });
+        return;
+      }
+
       for (let i = 0; i < items.length; i++) {
         if (!isShoppingListItem(items[i])) {
           res.status(400).json({ error: `Invalid item at index ${i}` });

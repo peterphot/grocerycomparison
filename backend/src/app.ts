@@ -1,14 +1,13 @@
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import { config } from './config.js';
 import { SearchOrchestrator } from './services/search-orchestrator.js';
 import { createSearchRouter } from './routes/search.js';
 
 const app = express();
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
-
-app.use(cors({ origin: FRONTEND_ORIGIN }));
+app.use(cors({ origin: config.frontendOrigin }));
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {

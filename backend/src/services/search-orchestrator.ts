@@ -1,6 +1,7 @@
 import type { ShoppingListItem, ComparisonResponse, ItemSearchResult, ProductMatch } from '@grocery/shared';
 import type { StoreAdapter } from '../adapters/store-adapter.js';
 import { buildComparisonResponse } from './result-builder.js';
+import { config } from '../config.js';
 
 interface CacheEntry {
   response: ComparisonResponse;
@@ -70,7 +71,7 @@ export class SearchOrchestrator {
 
     this.cache.set(cacheKey, {
       response,
-      expiresAt: Date.now() + 30_000,
+      expiresAt: Date.now() + config.resultCacheTtlMs,
     });
 
     return response;
