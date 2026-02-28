@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 
 // We import from app.ts (not index.ts) to avoid starting the server
@@ -10,6 +10,21 @@ describe('Express app', () => {
       const res = await request(app).get('/api/health');
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ status: 'ok' });
+    });
+  });
+
+  describe('MSW configuration', () => {
+    it('should not emit MSW warnings for supertest requests', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        await request(app).get('/api/health');
+        const mswWarnings = warnSpy.mock.calls.filter(
+          (args) => typeof args[0] === 'string' && args[0].includes('[MSW]'),
+        );
+        expect(mswWarnings).toHaveLength(0);
+      } finally {
+        warnSpy.mockRestore();
+      }
     });
   });
 
