@@ -9,25 +9,26 @@
     "start": "next start"
   },
   "dependencies": {
+    "@grocery/shared": "*",
+    "lucide-react": "^0.575.0",
     "next": "^15",
     "react": "^19",
-    "react-dom": "^19",
-    "@grocery/shared": "*"
+    "react-dom": "^19"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6",
+    "@testing-library/react": "^16",
+    "@testing-library/user-event": "^14",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/node": "^22",
-    "typescript": "^5",
-    "vitest": "^3",
     "@vitejs/plugin-react": "^4",
-    "@testing-library/react": "^16",
-    "@testing-library/jest-dom": "^6",
-    "@testing-library/user-event": "^14",
-    "msw": "^2",
+    "autoprefixer": "^10",
     "jsdom": "^25",
-    "tailwindcss": "^3",
+    "msw": "^2",
     "postcss": "^8",
-    "autoprefixer": "^10"
+    "tailwindcss": "^3",
+    "typescript": "^5",
+    "vitest": "^3"
   }
 }
