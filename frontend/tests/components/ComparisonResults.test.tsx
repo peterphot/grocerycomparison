@@ -251,6 +251,16 @@ describe('StoreColumn', () => {
     render(<StoreColumn storeTotal={aldiStore} isCheapest={false} />);
     expect(screen.getByText('1 item unavailable')).toBeInTheDocument();
   });
+
+  it('does not show unavailable count when all items are available', () => {
+    render(<StoreColumn storeTotal={colesStore} isCheapest={false} />);
+    expect(screen.queryByText(/items? unavailable/)).not.toBeInTheDocument();
+  });
+
+  it('shows unavailable count when some items are unavailable', () => {
+    render(<StoreColumn storeTotal={aldiStore} isCheapest={false} />);
+    expect(screen.getByText('1 item unavailable')).toBeInTheDocument();
+  });
 });
 
 describe('MixAndMatchColumn', () => {
