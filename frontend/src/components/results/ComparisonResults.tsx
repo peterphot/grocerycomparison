@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ComparisonResponse, StoreTotal } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
 import { MixAndMatchColumn } from './MixAndMatchColumn';
@@ -31,6 +31,11 @@ export function ComparisonResults({ response }: ComparisonResultsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>(
     response.storeTotals[0]?.store ?? 'mixandmatch',
   );
+
+  // Reset active tab when response changes (e.g. new search)
+  useEffect(() => {
+    setActiveTab(response.storeTotals[0]?.store ?? 'mixandmatch');
+  }, [response]);
 
   if (response.storeTotals.length === 0) return null;
 
