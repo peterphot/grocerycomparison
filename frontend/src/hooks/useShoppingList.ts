@@ -1,13 +1,9 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import type { ShoppingListItem } from '@grocery/shared';
 
-export interface ShoppingListItem {
-  id: string;
-  name: string;
-  quantity: number;
-  isBrandSpecific: boolean;
-}
+export type { ShoppingListItem };
 
 function createBlankItem(): ShoppingListItem {
   return {
@@ -18,8 +14,10 @@ function createBlankItem(): ShoppingListItem {
   };
 }
 
-export function useShoppingList() {
-  const [items, setItems] = useState<ShoppingListItem[]>([createBlankItem()]);
+export function useShoppingList(initialItems?: ShoppingListItem[]) {
+  const [items, setItems] = useState<ShoppingListItem[]>(
+    initialItems && initialItems.length > 0 ? initialItems : [createBlankItem()],
+  );
 
   const addItem = useCallback(() => {
     setItems((prev) => [...prev, createBlankItem()]);
