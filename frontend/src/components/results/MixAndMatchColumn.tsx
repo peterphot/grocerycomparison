@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { MixAndMatchResult } from '@grocery/shared';
 import { StoreHeader } from './StoreHeader';
 import { ItemRow } from './ItemRow';
@@ -7,7 +8,7 @@ interface MixAndMatchColumnProps {
   mixAndMatch: MixAndMatchResult;
 }
 
-export function MixAndMatchColumn({ mixAndMatch }: MixAndMatchColumnProps) {
+export const MixAndMatchColumn = memo(function MixAndMatchColumn({ mixAndMatch }: MixAndMatchColumnProps) {
   return (
     <ResultColumn
       header={
@@ -32,4 +33,4 @@ export function MixAndMatchColumn({ mixAndMatch }: MixAndMatchColumnProps) {
       ))}
     </ResultColumn>
   );
-}
+});

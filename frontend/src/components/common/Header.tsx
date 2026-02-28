@@ -16,6 +16,7 @@ export function Header({ showEdit, onEditList }: HeaderProps): React.ReactElemen
       <div className="flex items-center gap-3">
         {showEdit && onEditList && (
           <button
+            type="button"
             onClick={onEditList}
             className="md:hidden bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1.5"
             aria-label="Edit list"

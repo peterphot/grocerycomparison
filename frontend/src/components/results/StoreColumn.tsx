@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { StoreTotal } from '@grocery/shared';
 import { StoreHeader } from './StoreHeader';
 import { ItemRow } from './ItemRow';
@@ -8,7 +9,7 @@ interface StoreColumnProps {
   isCheapest: boolean;
 }
 
-export function StoreColumn({ storeTotal, isCheapest }: StoreColumnProps) {
+export const StoreColumn = memo(function StoreColumn({ storeTotal, isCheapest }: StoreColumnProps) {
   return (
     <ResultColumn
       header={
@@ -38,4 +39,4 @@ export function StoreColumn({ storeTotal, isCheapest }: StoreColumnProps) {
       )}
     </ResultColumn>
   );
-}
+});

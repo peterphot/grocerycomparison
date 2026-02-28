@@ -1,11 +1,10 @@
 import { ShoppingCart } from 'lucide-react';
+import { ALL_STORE_KEYS, STORE_DISPLAY_NAMES, STORE_COLORS } from '../../lib/store-colors';
 
-const STORE_BADGES = [
-  { name: 'Woolworths', color: '#00A347' },
-  { name: 'Coles', color: '#E2001A' },
-  { name: 'Aldi', color: '#003087' },
-  { name: 'Harris Farm', color: '#2D5E2A' },
-];
+const STORE_BADGES = ALL_STORE_KEYS.map((store) => ({
+  name: STORE_DISPLAY_NAMES[store],
+  color: STORE_COLORS[store],
+}));
 
 export function EmptyState(): React.ReactElement {
   return (

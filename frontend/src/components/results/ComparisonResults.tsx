@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
@@ -40,6 +40,10 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
   const [activeTab, setActiveTab] = useState<TabKey>(
     response.storeTotals[0]?.store ?? 'mixandmatch',
   );
+
+  useEffect(() => {
+    setActiveTab(response.storeTotals[0]?.store ?? 'mixandmatch');
+  }, [response.storeTotals]);
 
   const tabs = useMemo<Array<{ key: TabKey; label: string }>>(
     () => [

@@ -15,6 +15,8 @@ function buildCacheKey(items: ShoppingListItem[]): string {
     .join(',');
 }
 
+const MAX_CACHE_ENTRIES = 500;
+
 export class SearchOrchestrator {
   private adapters: StoreAdapter[];
   private cache = new Map<string, CacheEntry>();
@@ -23,11 +25,27 @@ export class SearchOrchestrator {
     this.adapters = adapters;
   }
 
+  private evictExpired(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.cache) {
+      if (entry.expiresAt <= now) this.cache.delete(key);
+    }
+  }
+
   async search(items: ShoppingListItem[]): Promise<ComparisonResponse> {
     const cacheKey = buildCacheKey(items);
     const cached = this.cache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.response;
+    }
+
+    if (this.cache.size >= MAX_CACHE_ENTRIES) {
+      this.evictExpired();
+    }
+    // If still at capacity after eviction, drop the oldest entry
+    if (this.cache.size >= MAX_CACHE_ENTRIES) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey !== undefined) this.cache.delete(oldestKey);
     }
 
     // Fan out: for each adapter, search all items concurrently

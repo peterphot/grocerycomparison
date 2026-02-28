@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { ProductMatch } from '@grocery/shared';
 import { formatPrice, formatUnitPrice } from '../../lib/utils';
 
@@ -8,7 +9,7 @@ interface ItemRowProps {
   quantity?: number;
 }
 
-export function ItemRow({ match, lineTotal, shoppingListItemName, quantity }: ItemRowProps) {
+export const ItemRow = memo(function ItemRow({ match, lineTotal, shoppingListItemName, quantity }: ItemRowProps) {
   if (!match) {
     return (
       <div className="py-2 px-3 border-b border-zinc-100">
@@ -44,4 +45,4 @@ export function ItemRow({ match, lineTotal, shoppingListItemName, quantity }: It
       </div>
     </div>
   );
-}
+});

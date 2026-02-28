@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Star } from 'lucide-react';
 import { formatPrice } from '../../lib/utils';
 
@@ -5,7 +6,7 @@ interface SavingsTipProps {
   savings: number;
 }
 
-export function SavingsTip({ savings }: SavingsTipProps) {
+export const SavingsTip = memo(function SavingsTip({ savings }: SavingsTipProps) {
   if (savings <= 0) return null;
 
   return (
@@ -16,4 +17,4 @@ export function SavingsTip({ savings }: SavingsTipProps) {
       </span>
     </div>
   );
-}
+});

@@ -35,6 +35,14 @@ export function createSearchRouter(orchestrator: SearchOrchestrator): Router {
         return;
       }
 
+      const hasOverlongName = items.some(
+        (item: { name: string }) => item.name.length > config.maxNameLength
+      );
+      if (hasOverlongName) {
+        res.status(400).json({ error: `Item name must be ${config.maxNameLength} characters or fewer` });
+        return;
+      }
+
       const result = await orchestrator.search(items);
       res.json(result);
     } catch (err) {

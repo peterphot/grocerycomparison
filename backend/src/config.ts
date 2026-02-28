@@ -10,6 +10,7 @@ export const config = {
   port: intEnv('PORT', 4000),
   frontendOrigin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000',
   maxItems: intEnv('MAX_ITEMS', 50),
+  maxNameLength: intEnv('MAX_NAME_LENGTH', 200),
   colesSessionTtlMs: intEnv('COLES_SESSION_TTL_MS', 300_000),
   resultCacheTtlMs: intEnv('RESULT_CACHE_TTL_MS', 30_000),
   maxConcurrentPerStore: intEnv('MAX_CONCURRENT_PER_STORE', 2),

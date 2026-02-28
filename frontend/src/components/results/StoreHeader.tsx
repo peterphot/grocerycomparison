@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { STORE_COLORS, type StoreColorKey } from '../../lib/store-colors';
 import { formatPrice } from '../../lib/utils';
 
@@ -8,7 +9,7 @@ interface StoreHeaderProps {
   total?: number;
 }
 
-export function StoreHeader({ storeName, store, isCheapest, total }: StoreHeaderProps) {
+export const StoreHeader = memo(function StoreHeader({ storeName, store, isCheapest, total }: StoreHeaderProps) {
   return (
     <div
       className="px-3 py-3 text-white text-center rounded-t-xl"
@@ -30,4 +31,4 @@ export function StoreHeader({ storeName, store, isCheapest, total }: StoreHeader
       )}
     </div>
   );
-}
+});

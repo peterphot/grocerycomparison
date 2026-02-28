@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Pencil } from 'lucide-react';
 import type { ShoppingListItem } from '@grocery/shared';
 
@@ -6,7 +7,7 @@ interface SummaryPanelProps {
   onEditList: () => void;
 }
 
-export function SummaryPanel({ items, onEditList }: SummaryPanelProps) {
+export const SummaryPanel = memo(function SummaryPanel({ items, onEditList }: SummaryPanelProps) {
   const itemCount = items.length;
 
   return (
@@ -50,4 +51,4 @@ export function SummaryPanel({ items, onEditList }: SummaryPanelProps) {
       </button>
     </div>
   );
-}
+});
