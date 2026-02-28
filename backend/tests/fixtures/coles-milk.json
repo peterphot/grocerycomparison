@@ -1,0 +1,52 @@
+{
+  "pageProps": {
+    "searchResults": {
+      "results": [
+        {
+          "_type": "PRODUCT",
+          "id": 8150288,
+          "name": "Full Cream Milk",
+          "brand": "Coles",
+          "description": "COLES FULL CREAM MILK 3L",
+          "size": "3L",
+          "availability": true,
+          "pricing": {
+            "now": 4.65,
+            "was": 0,
+            "unit": { "quantity": 1, "ofMeasureQuantity": 1, "ofMeasureUnits": "l", "price": 1.55 },
+            "comparable": "$1.55/ 1L"
+          }
+        },
+        {
+          "_type": "PRODUCT",
+          "id": 8150290,
+          "name": "Lite Milk",
+          "brand": "Coles",
+          "size": "2L",
+          "availability": true,
+          "pricing": {
+            "now": 3.10,
+            "unit": { "quantity": 1, "ofMeasureQuantity": 1, "ofMeasureUnits": "l", "price": 1.55 }
+          }
+        },
+        {
+          "_type": "PROMOTION",
+          "id": 999,
+          "name": "Half Price Milk Special"
+        },
+        {
+          "_type": "PRODUCT",
+          "id": 8150292,
+          "name": "Soy Milk",
+          "brand": "Bonsoy",
+          "size": "1L",
+          "availability": false,
+          "pricing": {
+            "now": 5.00,
+            "unit": { "quantity": 1, "ofMeasureQuantity": 1, "ofMeasureUnits": "l", "price": 5.00 }
+          }
+        }
+      ]
+    }
+  }
+}
