@@ -44,12 +44,6 @@ test.describe('Desktop Comparison', () => {
     await expect(page.getByText('Woolworths Full Cream Milk 2L')).toBeVisible();
   });
 
-  test('Journey 7: shows empty state before search', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByText('Compare prices in seconds')).toBeVisible();
-    await expect(page.getByText('Add items to your list and click Compare Prices')).toBeVisible();
-  });
-
   test('Journey 8: Edit List returns to form with items preserved', async ({ page }) => {
     await page.goto('/');
 

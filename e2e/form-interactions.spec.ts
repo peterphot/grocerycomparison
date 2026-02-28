@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 import { fillItem } from './helpers/shopping';
 
 test.describe('Form Interactions', () => {
+  test('Journey 7: shows empty state before search', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByText('Compare prices in seconds')).toBeVisible();
+    await expect(page.getByText('Add items to your list and click Compare Prices')).toBeVisible();
+  });
+
   test('Journey 4: add items, remove item, minimum 1 enforced', async ({ page }) => {
     await page.goto('/');
 

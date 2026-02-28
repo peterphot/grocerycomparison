@@ -1,4 +1,5 @@
 import type { Page, Locator } from '@playwright/test';
+import type { StoreName } from '@grocery/shared';
 
 /**
  * Fill an item row in the shopping list form.
@@ -39,6 +40,6 @@ export async function waitForResults(page: Page): Promise<void> {
 /**
  * Get a locator scoped to a specific store's result column by test ID.
  */
-export function storeColumn(page: Page, storeKey: string): Locator {
+export function storeColumn(page: Page, storeKey: StoreName): Locator {
   return page.getByTestId(`store-column-${storeKey}`);
 }

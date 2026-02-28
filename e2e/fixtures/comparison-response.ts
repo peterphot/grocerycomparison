@@ -6,7 +6,7 @@ import type {
   StoreItemResult,
   MixAndMatchItem,
 } from '@grocery/shared';
-import { STORE_DISPLAY_NAMES } from '@grocery/shared';
+import { ALL_STORES, STORE_DISPLAY_NAMES } from '@grocery/shared';
 
 interface ProductDef {
   productName: string;
@@ -16,6 +16,15 @@ interface ProductDef {
   unitPrice: number | null;
   unitMeasure: string | null;
   unitPriceNormalised: number | null;
+}
+
+function requireProduct(
+  defs: Partial<Record<StoreName, ProductDef>>,
+  store: StoreName,
+): ProductDef {
+  const def = defs[store];
+  if (!def) throw new Error(`Missing product definition for ${store}`);
+  return def;
 }
 
 function makeProduct(store: StoreName, def: ProductDef): ProductMatch {
@@ -99,11 +108,11 @@ export const defaultResponse: ComparisonResponse = {
   storeTotals: [
     makeStoreTotal('woolworths', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('woolworths', MILK.woolworths)),
-      makeStoreItem('item-2', 'bread', 1, makeProduct('woolworths', BREAD.woolworths!)),
+      makeStoreItem('item-2', 'bread', 1, makeProduct('woolworths', requireProduct(BREAD, 'woolworths'))),
     ]),
     makeStoreTotal('coles', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('coles', MILK.coles)),
-      makeStoreItem('item-2', 'bread', 1, makeProduct('coles', BREAD.coles!)),
+      makeStoreItem('item-2', 'bread', 1, makeProduct('coles', requireProduct(BREAD, 'coles'))),
     ]),
     makeStoreTotal('aldi', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('aldi', MILK.aldi)),
@@ -111,15 +120,15 @@ export const defaultResponse: ComparisonResponse = {
     ]),
     makeStoreTotal('harrisfarm', [
       makeStoreItem('item-1', 'milk', 1, makeProduct('harrisfarm', MILK.harrisfarm)),
-      makeStoreItem('item-2', 'bread', 1, makeProduct('harrisfarm', BREAD.harrisfarm!)),
+      makeStoreItem('item-2', 'bread', 1, makeProduct('harrisfarm', requireProduct(BREAD, 'harrisfarm'))),
     ]),
   ],
   mixAndMatch: {
     items: [
       makeMixItem('item-1', 'milk', 1, makeProduct('aldi', MILK.aldi)),
-      makeMixItem('item-2', 'bread', 1, makeProduct('coles', BREAD.coles!)),
+      makeMixItem('item-2', 'bread', 1, makeProduct('coles', requireProduct(BREAD, 'coles'))),
     ],
-    total: MILK.aldi.price + BREAD.coles!.price,
+    total: MILK.aldi.price + requireProduct(BREAD, 'coles').price,
   },
   searchResults: [],
 };
@@ -128,9 +137,7 @@ export const defaultResponse: ComparisonResponse = {
  * Build a response where "milk" has the given quantity, with lineTotal = price * quantity.
  */
 export function buildQuantityResponse(quantity: number): ComparisonResponse {
-  const stores: StoreName[] = ['woolworths', 'coles', 'aldi', 'harrisfarm'];
-
-  const storeTotals = stores.map((store) =>
+  const storeTotals = ALL_STORES.map((store) =>
     makeStoreTotal(store, [
       makeStoreItem('item-1', 'milk', quantity, makeProduct(store, MILK[store])),
     ]),

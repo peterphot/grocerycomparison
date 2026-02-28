@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { MOCK_PORT } from './e2e/e2e.config';
 
 export default defineConfig({
   testDir: './e2e',
@@ -13,13 +14,13 @@ export default defineConfig({
     {
       command: 'npm run dev --workspace=frontend',
       url: 'http://localhost:3000',
-      env: { NEXT_PUBLIC_API_URL: 'http://localhost:4001' },
+      env: { NEXT_PUBLIC_API_URL: `http://localhost:${MOCK_PORT}` },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
       command: 'npx tsx e2e/fixtures/mock-server.ts',
-      url: 'http://localhost:4001/api/health',
+      url: `http://localhost:${MOCK_PORT}/api/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
