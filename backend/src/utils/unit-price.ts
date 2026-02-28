@@ -1,12 +1,11 @@
-const MULTI_PACK_RE = /(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(fl\s*oz|kg|ml|lb|oz|g|l)/i;
-const SINGLE_RE = /(\d+(?:\.\d+)?)\s*(fl\s*oz|kg|ml|lb|oz|g|l)/i;
+// Metric only — Australian market
+const MULTI_PACK_RE = /(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i;
+const SINGLE_RE = /(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i;
 
 function normalise(qty: number, unit: string): { qty: number; unit: string } | null {
   const u = unit.toLowerCase();
   if (u === 'kg') return { qty: qty * 1000, unit: 'g' };
   if (u === 'l') return { qty: qty * 1000, unit: 'ml' };
-  if (u === 'oz') return { qty: +(qty * 28.35).toFixed(4), unit: 'g' };
-  if (u === 'lb') return { qty: +(qty * 453.592).toFixed(4), unit: 'g' };
   if (u === 'g') return { qty, unit: 'g' };
   if (u === 'ml') return { qty, unit: 'ml' };
   return null;

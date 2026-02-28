@@ -30,12 +30,12 @@ describe('parsePackageSize', () => {
     expect(parsePackageSize('380g')).toEqual({ qty: 380, unit: 'g' });
   });
 
-  it('parses "16oz" to { qty: 453.6, unit: "g" }', () => {
-    expect(parsePackageSize('16oz')).toEqual({ qty: 453.6, unit: 'g' });
+  it('returns null for "16oz" (imperial not supported)', () => {
+    expect(parsePackageSize('16oz')).toBeNull();
   });
 
-  it('parses "1lb" to { qty: 453.592, unit: "g" }', () => {
-    expect(parsePackageSize('1lb')).toEqual({ qty: 453.592, unit: 'g' });
+  it('returns null for "1lb" (imperial not supported)', () => {
+    expect(parsePackageSize('1lb')).toBeNull();
   });
 
   it('is case insensitive for "500G"', () => {
