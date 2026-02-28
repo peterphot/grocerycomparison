@@ -3,6 +3,7 @@ export type { ShoppingListItem, ShoppingList } from './shopping-list.js';
 
 // Product types
 export type { StoreName, ProductMatch, ItemSearchResult } from './product.js';
+export { ALL_STORES, STORE_DISPLAY_NAMES } from './product.js';
 
 // Comparison types
 export type {
