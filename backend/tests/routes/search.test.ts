@@ -12,7 +12,7 @@ vi.mock('../../src/services/search-orchestrator.js', () => {
   };
 });
 
-import app from '../../src/app';
+import app from '../../src/app.js';
 import { SearchOrchestrator } from '../../src/services/search-orchestrator.js';
 
 // Get reference to mock search function

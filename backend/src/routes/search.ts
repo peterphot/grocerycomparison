@@ -8,7 +8,7 @@ export function createSearchRouter(orchestrator: SearchOrchestrator): Router {
 
   router.post('/', async (req, res, next) => {
     try {
-      const { items } = req.body;
+      const { items } = req.body ?? {};
 
       if (!Array.isArray(items) || items.length === 0) {
         res.status(400).json({ error: 'items must be a non-empty array' });
