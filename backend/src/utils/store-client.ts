@@ -1,6 +1,6 @@
 import type { StoreName } from '@grocery/shared';
 import { StoreApiError } from '@grocery/shared';
-import { httpGet, type HttpClientOptions } from './http-client.js';
+import { httpGet } from './http-client.js';
 import { RateLimiter } from './rate-limiter.js';
 
 const ALLOWED_HOSTS: Record<StoreName, readonly string[]> = {
@@ -10,8 +10,8 @@ const ALLOWED_HOSTS: Record<StoreName, readonly string[]> = {
   harrisfarm: ['harrisfarm.com.au'],
 };
 
-/** Shared rate limiter instance — all store adapters must use this to enforce per-store concurrency. */
-export const sharedRateLimiter = new RateLimiter(2);
+/** Shared rate limiter instance — all store adapters use this to enforce per-store concurrency. */
+const sharedRateLimiter = new RateLimiter(2);
 
 function validateUrl(url: string, store: StoreName): void {
   let parsed: URL;
@@ -33,13 +33,13 @@ function validateUrl(url: string, store: StoreName): void {
 }
 
 export interface StoreClient {
-  get: <T = unknown>(url: string, opts?: Omit<HttpClientOptions, 'store'>) => Promise<T>;
+  get: <T = unknown>(url: string, opts?: { headers?: Record<string, string>; timeoutMs?: number }) => Promise<T>;
 }
 
 export function createStoreClient(store: StoreName, rateLimiter?: RateLimiter): StoreClient {
   const limiter = rateLimiter ?? sharedRateLimiter;
   return {
-    get: async <T = unknown>(url: string, opts?: Omit<HttpClientOptions, 'store'>): Promise<T> => {
+    get: async <T = unknown>(url: string, opts?: { headers?: Record<string, string>; timeoutMs?: number }): Promise<T> => {
       validateUrl(url, store);
       return limiter.execute(store, () => httpGet<T>(url, { ...opts, store }));
     },

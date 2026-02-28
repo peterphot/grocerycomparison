@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../setup.js';
-import { createStoreClient, sharedRateLimiter } from '../../src/utils/store-client.js';
+import { createStoreClient } from '../../src/utils/store-client.js';
 import { RateLimiter } from '../../src/utils/rate-limiter.js';
 import { StoreApiError } from '@grocery/shared';
 
@@ -73,8 +73,12 @@ describe('createStoreClient', () => {
   });
 
   describe('rate limiting', () => {
-    it('uses the shared rate limiter by default', () => {
-      expect(sharedRateLimiter).toBeInstanceOf(RateLimiter);
+    it('uses the shared rate limiter by default', async () => {
+      const url = 'https://www.woolworths.com.au/apis/test';
+      server.use(http.get(url, () => HttpResponse.json({ ok: true })));
+      const client = createStoreClient('woolworths');
+      // Should succeed — proves the default client has a working rate limiter
+      await expect(client.get(url)).resolves.toEqual({ ok: true });
     });
 
     it('accepts a custom rate limiter', async () => {

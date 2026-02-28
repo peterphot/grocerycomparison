@@ -1,5 +1,4 @@
 import { StoreApiError } from '@grocery/shared';
-import type { StoreName } from '@grocery/shared';
 
 const DEFAULT_HEADERS: Record<string, string> = {
   'User-Agent':
@@ -13,7 +12,7 @@ const MAX_RETRIES = 1;
 
 export interface HttpClientOptions {
   headers?: Record<string, string>;
-  store: StoreName;
+  store: string;
   timeoutMs?: number;
 }
 
