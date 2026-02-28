@@ -1,0 +1,20 @@
+{
+  "name": "grocerycomparison",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "latest",
+    "typescript": "^5",
+    "@playwright/test": "latest"
+  }
+}

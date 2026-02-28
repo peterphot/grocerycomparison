@@ -1,0 +1,15 @@
+{
+  "name": "@grocery/shared",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/types/index.ts",
+  "types": "./src/types/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "vitest": "^3",
+    "typescript": "^5"
+  }
+}
