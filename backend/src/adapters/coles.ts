@@ -1,4 +1,5 @@
 import type { ProductMatch } from '@grocery/shared';
+import { StoreApiError } from '@grocery/shared';
 import { httpGet } from '../utils/http-client';
 import { parsePackageSize, computeNormalisedUnitPrice } from '../utils/unit-price';
 import { ColesSessionManager } from '../utils/coles-session';
@@ -40,7 +41,18 @@ export class ColesAdapter implements StoreAdapter {
   constructor(private readonly sessionManager: ColesSessionManager) {}
 
   async searchProduct(query: string): Promise<ProductMatch[]> {
-    const { buildId, cookies } = await this.sessionManager.ensureSession();
+    let buildId: string;
+    let cookies: string;
+    try {
+      ({ buildId, cookies } = await this.sessionManager.ensureSession());
+    } catch (err) {
+      throw new StoreApiError(
+        err instanceof Error ? err.message : 'Session refresh failed',
+        'coles',
+        undefined,
+        true,
+      );
+    }
 
     const url = `https://www.coles.com.au/_next/data/${buildId}/search/products.json?keyword=${encodeURIComponent(query)}`;
 

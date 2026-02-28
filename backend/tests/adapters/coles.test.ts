@@ -94,6 +94,18 @@ describe('ColesAdapter', () => {
     expect(names).not.toContain('Soy Milk');
   });
 
+  it('wraps session failure as StoreApiError', async () => {
+    server.use(
+      http.get('https://www.coles.com.au/', () => {
+        return new HttpResponse('<html></html>', {
+          headers: { 'Content-Type': 'text/html' },
+        });
+      }),
+    );
+    const freshAdapter = new ColesAdapter(new ColesSessionManager());
+    await expect(freshAdapter.searchProduct('milk')).rejects.toThrow(StoreApiError);
+  });
+
   it('throws StoreApiError on persistent error', async () => {
     server.use(
       http.get('https://www.coles.com.au/_next/data/:buildId/search/products.json', () => {

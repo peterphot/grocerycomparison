@@ -1,3 +1,5 @@
+import { DEFAULT_USER_AGENT } from './http-client';
+
 export class ColesSessionManager {
   private cookies: string | null = null;
   private buildId: string | null = null;
@@ -15,12 +17,6 @@ export class ColesSessionManager {
     return { cookies: this.cookies!, buildId: this.buildId! };
   }
 
-  clearCache(): void {
-    this.cookies = null;
-    this.buildId = null;
-    this.lastRefreshed = 0;
-  }
-
   private isExpired(): boolean {
     return !this.buildId || Date.now() - this.lastRefreshed > this.TTL;
   }
@@ -28,8 +24,7 @@ export class ColesSessionManager {
   private async refresh(): Promise<void> {
     const res = await fetch('https://www.coles.com.au/', {
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'User-Agent': DEFAULT_USER_AGENT,
       },
       redirect: 'follow',
       signal: AbortSignal.timeout(10_000),
