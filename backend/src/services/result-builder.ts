@@ -8,20 +8,25 @@ import type {
   MixAndMatchItem,
   ComparisonResponse,
 } from '@grocery/shared';
+import { ALL_STORES, STORE_DISPLAY_NAMES } from '@grocery/shared';
 
-const ALL_STORES: StoreName[] = ['woolworths', 'coles', 'aldi', 'harrisfarm'];
+function roundCents(value: number): number {
+  return Math.round(value * 100) / 100;
+}
 
-const STORE_DISPLAY_NAMES: Record<StoreName, string> = {
-  woolworths: 'Woolworths',
-  coles: 'Coles',
-  aldi: 'Aldi',
-  harrisfarm: 'Harris Farm',
-};
+function cheapestAvailableMatch(
+  matches: ProductMatch[],
+  store: StoreName,
+): ProductMatch | null {
+  const storeMatches = matches.filter((m) => m.store === store && m.available);
+  if (storeMatches.length === 0) return null;
+  return storeMatches.reduce((best, curr) => (curr.price < best.price ? curr : best));
+}
 
 export function buildStoreTotals(results: ItemSearchResult[]): StoreTotal[] {
   const totals = ALL_STORES.map((store) => {
     const items: StoreItemResult[] = results.map((result) => {
-      const match = result.matches.find((m) => m.store === store && m.available) || null;
+      const match = cheapestAvailableMatch(result.matches, store);
       const lineTotal = match ? match.price * result.quantity : 0;
       return {
         shoppingListItemId: result.shoppingListItemId,
@@ -37,15 +42,16 @@ export function buildStoreTotals(results: ItemSearchResult[]): StoreTotal[] {
       store,
       storeName: STORE_DISPLAY_NAMES[store],
       items,
-      total: Math.round(total * 100) / 100,
+      total: roundCents(total),
       unavailableCount,
       allItemsAvailable: unavailableCount === 0,
     };
   });
 
   return totals.sort((a, b) => {
-    if (!a.allItemsAvailable && a.total === 0 && b.total > 0) return 1;
-    if (!b.allItemsAvailable && b.total === 0 && a.total > 0) return -1;
+    const aFullyUnavail = a.unavailableCount === a.items.length;
+    const bFullyUnavail = b.unavailableCount === b.items.length;
+    if (aFullyUnavail !== bFullyUnavail) return aFullyUnavail ? 1 : -1;
     return a.total - b.total;
   });
 }
@@ -62,6 +68,10 @@ export function buildMixAndMatch(results: ItemSearchResult[]): MixAndMatchResult
         lineTotal: 0,
       };
     }
+    // When any match provides unitPriceNormalised, compare by that metric.
+    // Matches missing unitPriceNormalised are treated as Infinity so they lose
+    // to matches with known per-unit pricing — this intentionally favours stores
+    // that report comparable unit prices over those that don't.
     const hasNormalised = availableMatches.some((m) => m.unitPriceNormalised !== null);
     const cheapest = availableMatches.reduce((best, curr) => {
       if (hasNormalised) {
@@ -76,10 +86,10 @@ export function buildMixAndMatch(results: ItemSearchResult[]): MixAndMatchResult
       shoppingListItemName: result.shoppingListItemName,
       quantity: result.quantity,
       cheapestMatch: cheapest,
-      lineTotal: Math.round(cheapest.price * result.quantity * 100) / 100,
+      lineTotal: roundCents(cheapest.price * result.quantity),
     };
   });
-  const total = Math.round(items.reduce((sum, item) => sum + item.lineTotal, 0) * 100) / 100;
+  const total = roundCents(items.reduce((sum, item) => sum + item.lineTotal, 0));
   return { items, total };
 }
 

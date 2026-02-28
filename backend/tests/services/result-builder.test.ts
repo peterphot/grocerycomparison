@@ -116,6 +116,45 @@ describe('buildStoreTotals', () => {
     expect(woolworths.total).toBe(6.00);
   });
 
+  it('treats matches with available: false as unavailable', () => {
+    const results = [
+      makeSearchResult({
+        matches: [
+          makeMatch({ store: 'woolworths', price: 3.00, available: true }),
+          makeMatch({ store: 'woolworths', price: 5.00, available: false }),
+          makeMatch({ store: 'coles', price: 4.00, available: false }),
+        ],
+      }),
+    ];
+
+    const totals = buildStoreTotals(results);
+    const woolworths = totals.find((t) => t.store === 'woolworths')!;
+    const coles = totals.find((t) => t.store === 'coles')!;
+
+    expect(woolworths.items[0].match!.price).toBe(3.00);
+    expect(woolworths.allItemsAvailable).toBe(true);
+    expect(coles.items[0].match).toBeNull();
+    expect(coles.allItemsAvailable).toBe(false);
+  });
+
+  it('picks cheapest available match when store has multiple matches', () => {
+    const results = [
+      makeSearchResult({
+        matches: [
+          makeMatch({ store: 'woolworths', price: 5.00 }),
+          makeMatch({ store: 'woolworths', price: 2.00 }),
+          makeMatch({ store: 'woolworths', price: 8.00 }),
+        ],
+      }),
+    ];
+
+    const totals = buildStoreTotals(results);
+    const woolworths = totals.find((t) => t.store === 'woolworths')!;
+
+    expect(woolworths.items[0].match!.price).toBe(2.00);
+    expect(woolworths.total).toBe(2.00);
+  });
+
   it('stores with all items unavailable (total 0) sort last', () => {
     const results = [
       makeSearchResult({
@@ -185,6 +224,21 @@ describe('buildMixAndMatch', () => {
     const mix = buildMixAndMatch(results);
     expect(mix.items[0].cheapestMatch!.store).toBe('coles');
     expect(mix.items[0].lineTotal).toBe(3.00);
+  });
+
+  it('ignores matches with available: false', () => {
+    const results = [
+      makeSearchResult({
+        matches: [
+          makeMatch({ store: 'woolworths', price: 1.00, available: false, unitPriceNormalised: null }),
+          makeMatch({ store: 'coles', price: 5.00, available: true, unitPriceNormalised: null }),
+        ],
+      }),
+    ];
+
+    const mix = buildMixAndMatch(results);
+    expect(mix.items[0].cheapestMatch!.store).toBe('coles');
+    expect(mix.items[0].lineTotal).toBe(5.00);
   });
 
   it('sets cheapestMatch to null when no store has the item', () => {
