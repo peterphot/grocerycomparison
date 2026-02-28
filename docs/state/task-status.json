@@ -23,7 +23,7 @@
     "T013": { "status": "complete", "description": "Page integration & API client", "pr": "#14" },
     "T014": { "status": "complete", "description": "Playwright E2E tests", "pr": "#15" },
     "T015": { "status": "complete", "description": "Error handling & polish", "pr": "#16" },
-    "T016": { "status": "backlog", "description": "E2E test coverage improvements + adapter wiring bug fix" },
-    "T017": { "status": "backlog", "description": "UI design alignment — 20+ discrepancies between live app and Pencil designs" }
+    "T016": { "status": "complete", "description": "E2E test coverage improvements + adapter wiring bug fix", "pr": "#17" },
+    "T017": { "status": "complete", "description": "UI design alignment — 20+ discrepancies between live app and Pencil designs", "pr": "#19" }
   }
 }
