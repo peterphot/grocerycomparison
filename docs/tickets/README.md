@@ -21,18 +21,23 @@ T002 ──► T012 (Comparison Results) ─────────────
 
 ## Parallelism Summary
 
-| Wave | Tickets | Can Start When |
-|------|---------|----------------|
-| 1 | T001 | Immediately |
-| 2 | T002 | T001 done |
-| 3 | T003 | T002 done |
-| 4 (parallel) | T004, T005, T006, T007, T008 | T003 done (T008 only needs T002) |
-| 4 (parallel) | T011 | T001 done |
-| 4 (parallel) | T012 | T002 done |
-| 5 | T009 | T004 + T005 + T006 + T007 + T008 all done |
-| 6 | T010 | T009 done |
-| 7 | T013 | T010 + T011 + T012 all done |
-| 8 (parallel) | T014, T015 | T013 done |
+> Note: T011 and T012 can begin much earlier than T004–T008 since they only need scaffolding and
+> types respectively. A team can start frontend work immediately after T002, fully in parallel
+> with all backend adapter work.
+
+| Wave | Tickets | Can Start When | Notes |
+|------|---------|----------------|-------|
+| 1 | T001 | Immediately | Unblocks everything |
+| 2 | T002 | T001 done | Unblocks backend + frontend results |
+| 2 (parallel) | T011 | T001 done | Shopping list form — no backend needed |
+| 3 | T003 | T002 done | Unblocks all adapters |
+| 3 (parallel) | T008 | T002 done | Result builder is pure logic, no adapters needed |
+| 3 (parallel) | T012 | T002 done | Results components use mock data, no backend needed |
+| 4 (parallel) | T004, T005, T006, T007 | T003 done | All 4 adapters fully independent of each other |
+| 5 | T009 | T004+T005+T006+T007+T008 all done | Orchestrates all adapters |
+| 6 | T010 | T009 done | Wires server; T011+T012 continue in parallel |
+| 7 | T013 | T010+T011+T012 all done | Integration point |
+| 8 (parallel) | T014, T015 | T013 done | E2E + polish run concurrently |
 
 ## All Tickets
 

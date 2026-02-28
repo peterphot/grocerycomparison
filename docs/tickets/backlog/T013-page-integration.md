@@ -55,7 +55,17 @@ After this ticket, the app is functionally complete end-to-end.
 
 ### ErrorBanner component
 - [ ] Shows user-friendly error message
-- [ ] Offers "Try again" action
+- [ ] Offers "Try again" action (calls `onRetry` prop)
+
+### Empty state (initial)
+- [ ] Before any search, the right panel (desktop) / below form (mobile) shows an empty state
+- [ ] Empty state contains: an illustration or large icon, heading "Compare prices in seconds", subtext "Add items above and click Compare Prices"
+- [ ] Use a free SVG illustration (e.g., from Heroicons or a static file in `public/`)
+
+### Utility functions (`frontend/src/lib/utils.ts`)
+- [ ] `formatPrice(amount: number): string` — returns `"$4.65"`, rounds to 2 decimal places
+- [ ] `formatUnitPrice(unitPrice: number, unitMeasure: string): string` — returns `"$1.55 / L"`
+- [ ] Both are tested with edge cases (rounding, zero, null guard)
 
 ---
 
@@ -72,6 +82,19 @@ After this ticket, the app is functionally complete end-to-end.
 ## Test Plan
 
 ```typescript
+// frontend/tests/lib/utils.test.ts
+describe('formatPrice', () => {
+  it('formats 4.65 → "$4.65"')
+  it('formats 4.6 → "$4.60"')
+  it('rounds 1.5678 → "$1.57"')
+  it('formats 0 → "$0.00"')
+})
+
+describe('formatUnitPrice', () => {
+  it('formats (1.55, "L") → "$1.55 / L"')
+  it('formats (0.89, "100g") → "$0.89 / 100g"')
+})
+
 // frontend/tests/lib/api.test.ts
 describe('searchGroceries', () => {
   it('POSTs items to /api/search and returns ComparisonResponse')
@@ -88,6 +111,12 @@ describe('HomePage', () => {
   it('renders error banner when search fails')
   it('clicking Edit List returns to form view')
   it('renders Header on all states')
+  it('shows empty state illustration before first search')
+})
+
+describe('utils', () => {
+  it('formatPrice rounds and prepends dollar sign')
+  it('formatUnitPrice builds "/$unit" label')
 })
 
 describe('Header', () => {
@@ -134,6 +163,9 @@ Register a handler for `POST http://localhost:4000/api/search` returning the moc
 | `frontend/src/components/common/Header.tsx` | Site header |
 | `frontend/src/components/common/LoadingSpinner.tsx` | Loading state |
 | `frontend/src/components/common/ErrorBanner.tsx` | Error state |
+| `frontend/src/components/common/EmptyState.tsx` | Initial empty panel state |
+| `frontend/src/lib/utils.ts` | `formatPrice`, `formatUnitPrice` |
 | `frontend/tests/lib/api.test.ts` | API client tests |
+| `frontend/tests/lib/utils.test.ts` | Utility function tests |
 | `frontend/tests/app/page.test.tsx` | Page integration tests |
 | `frontend/tests/setup.ts` | msw server setup |

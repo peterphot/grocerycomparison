@@ -91,6 +91,22 @@ app.use((err, req, res, next) => {
 });
 ```
 
+### Config module
+`backend/src/config.ts` must export all constants (sourced from env with defaults):
+```typescript
+export const config = {
+  port: Number(process.env.PORT ?? 4000),
+  frontendOrigin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000',
+  requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS ?? 10_000),
+  colesSessionTtlMs: Number(process.env.COLES_SESSION_TTL_MS ?? 300_000),
+  resultCacheTtlMs: Number(process.env.RESULT_CACHE_TTL_MS ?? 30_000),
+  maxConcurrentPerStore: Number(process.env.MAX_CONCURRENT_PER_STORE ?? 2),
+  userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  aldiOrigin: 'https://www.aldi.com.au',
+  aldiReferer: 'https://www.aldi.com.au/',
+} as const;
+```
+
 ### Entry point structure
 `backend/src/index.ts` creates the Express app, registers middleware and routes, then starts listening.
 Keep `app` creation separate from `listen()` call so supertest can import the app without starting a server.
@@ -104,5 +120,5 @@ Keep `app` creation separate from `listen()` call so supertest can import the ap
 | `backend/src/index.ts` | Express app entry + server start |
 | `backend/src/app.ts` | Express app creation (separate from listen) |
 | `backend/src/routes/search.ts` | `POST /api/search` route handler |
-| `backend/src/config.ts` | Port, CORS origin, timeout constants |
+| `backend/src/config.ts` | All constants from env with defaults |
 | `backend/tests/routes/search.test.ts` | Supertest integration tests |

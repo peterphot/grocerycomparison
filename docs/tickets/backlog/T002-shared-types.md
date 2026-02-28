@@ -30,6 +30,7 @@ This package is the contract between layers — every other package imports from
 - [ ] `packages/shared/src/types/shopping-list.ts` exports `ShoppingListItem`, `ShoppingList`
 - [ ] `packages/shared/src/types/product.ts` exports `StoreName`, `ProductMatch`, `ItemSearchResult`
 - [ ] `packages/shared/src/types/comparison.ts` exports `StoreTotal`, `StoreItemResult`, `MixAndMatchResult`, `MixAndMatchItem`, `ComparisonResponse`
+- [ ] `packages/shared/src/types/errors.ts` exports `StoreApiError` (backend) and `ApiError` (frontend) classes
 - [ ] `packages/shared/src/types/index.ts` re-exports everything
 - [ ] Type guard functions exist for runtime validation: `isShoppingListItem`, `isProductMatch`, `isComparisonResponse`
 - [ ] All types compile with `strict: true`, no `any`
@@ -74,6 +75,41 @@ describe('isComparisonResponse', () => {
 
 ---
 
+## Error Type Definitions
+
+```typescript
+// packages/shared/src/types/errors.ts
+
+/** Thrown by store adapters when an API call fails */
+export class StoreApiError extends Error {
+  constructor(
+    message: string,
+    public readonly store: StoreName,
+    public readonly statusCode?: number,
+    public readonly isRetryable: boolean = false,
+  ) {
+    super(message);
+    this.name = 'StoreApiError';
+  }
+}
+
+/** Thrown by the frontend API client on non-2xx responses */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+```
+
+Retryable errors: 5xx status codes and network/timeout errors.
+Non-retryable: 4xx (bad request, not found).
+
+---
+
 ## Implementation Notes
 
 All types are defined verbatim from `plan.md` Section 4. Key notes:
@@ -92,6 +128,7 @@ All types are defined verbatim from `plan.md` Section 4. Key notes:
 | `packages/shared/src/types/shopping-list.ts` | `ShoppingListItem`, `ShoppingList` |
 | `packages/shared/src/types/product.ts` | `StoreName`, `ProductMatch`, `ItemSearchResult` |
 | `packages/shared/src/types/comparison.ts` | `StoreTotal`, `StoreItemResult`, `MixAndMatchResult`, `MixAndMatchItem`, `ComparisonResponse` |
+| `packages/shared/src/types/errors.ts` | `StoreApiError`, `ApiError` |
 | `packages/shared/src/types/index.ts` | Re-exports all types |
 | `packages/shared/src/guards/index.ts` | Runtime type guard functions |
 | `packages/shared/tests/type-guards.test.ts` | Type guard unit tests |

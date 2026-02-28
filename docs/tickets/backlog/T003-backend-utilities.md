@@ -31,8 +31,11 @@ Implement the three foundational backend utilities shared by all store adapters:
 ### HTTP Client
 - [ ] Sends requests with Chrome User-Agent by default
 - [ ] Accepts per-request header overrides (for Aldi Origin/Referer, Coles cookies)
-- [ ] Enforces 10-second timeout per request
+- [ ] Enforces 10-second timeout per request (independent per store call, not global)
 - [ ] Throws a typed `StoreApiError` on non-2xx responses
+- [ ] Retries once on transient errors (5xx, network errors, AbortError) with 500ms backoff
+- [ ] Does NOT retry on 4xx responses (non-retryable)
+- [ ] On stale Coles buildId (404): marks error as retryable so session manager can refresh
 
 ### Rate Limiter
 - [ ] Limits concurrent outbound requests per store to max 2
@@ -56,7 +59,9 @@ Implement the three foundational backend utilities shared by all store adapters:
 ### Size String Parsing
 - [ ] Parses: `"500g"`, `"2kg"`, `"1.5L"`, `"600ml"`, `"2 x 250ml"`, `"380g"`
 - [ ] Handles case-insensitive units: `"500G"`, `"2KG"`, `"1.5l"`
+- [ ] Handles imperial units: `"16oz"` → g, `"1lb"` → g, `"2 fl oz"` → ml
 - [ ] Returns `null` for: `""`, `"pack of 4"`, `"each"`, `"assorted"`
+- [ ] Unit conversions: kg→g (×1000), L→ml (×1000), oz→g (×28.35), lb→g (×453.592), fl oz→ml (×29.574)
 
 ---
 
@@ -99,9 +104,11 @@ describe('computeNormalisedUnitPrice', () => {
 describe('httpClient', () => {
   it('sends Chrome User-Agent header on every request')
   it('merges per-request headers with defaults')
-  it('throws StoreApiError on 404')
-  it('throws StoreApiError on 500')
-  it('resolves after 10s timeout with StoreApiError')
+  it('throws StoreApiError on 404 — not retryable')
+  it('throws StoreApiError on 500 — retryable, retries once')
+  it('does not retry more than once on 5xx')
+  it('throws StoreApiError after 10s timeout with AbortError')
+  it('waits 500ms before retry attempt')
 })
 
 // backend/tests/utils/rate-limiter.test.ts
@@ -127,8 +134,35 @@ volume >= 1000ml → display per L
 Regex for `"N x Xunit"` pattern: multiply N × X.
 E.g., `"2 x 250ml"` → 500ml total.
 
+### Retry logic
+```typescript
+async function fetchWithRetry(url: string, options: RequestInit, retries = 1): Promise<Response> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok && isRetryable(res.status) && retries > 0) {
+      await delay(500);
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    return res;
+  } catch (err) {
+    if (isNetworkError(err) && retries > 0) {
+      await delay(500);
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw err;
+  }
+}
+
+const isRetryable = (status: number) => status >= 500;
+const isNetworkError = (err: unknown) => err instanceof Error &&
+  (err.name === 'AbortError' || err.name === 'FetchError');
+```
+
 ### HTTP client
-Thin wrapper over `node-fetch` or native `fetch` (Node 18+). Return typed responses.
+Thin wrapper over native `fetch` (Node 18+). Return typed responses.
 Do NOT use axios — keep the dependency footprint small.
 
 ### Rate limiter

@@ -72,14 +72,36 @@ Tests run against both frontend and backend with the backend API mocked at the n
 - [ ] All store adapters return errors
 - [ ] Results still appear, all items marked "Not available"
 
+**Journey 7: Initial empty state**
+- [ ] Page loads with no search performed
+- [ ] Right panel (desktop) shows empty state: illustration + "Compare prices in seconds" heading
+- [ ] Empty state is not shown after a search
+
+**Journey 8: Edit list after viewing results**
+- [ ] User compares prices and sees results
+- [ ] Clicks "Edit List" button
+- [ ] Shopping list form reappears with items still populated
+- [ ] User can modify an item and re-compare
+
+**Journey 9: Quantity affects line total**
+- [ ] User adds "milk" with quantity 3
+- [ ] After comparing, line total shown is price × 3 (not just price)
+- [ ] Store total reflects quantity-adjusted amounts
+
 ---
 
 ## TDD Notes
 
-Playwright E2E tests are not strictly TDD (you can't run E2E against non-existent code), but:
-- [ ] Write E2E specs BEFORE T015 polish work begins — they should expose UX gaps
-- [ ] Each spec must have a clear assertion (not just "no errors thrown")
-- [ ] Use `page.getByRole`, `page.getByText` over CSS selectors — tests should match user intent
+E2E tests are **regression tests, not TDD** — they can only run after T013 is complete.
+Their role is different from unit tests:
+- Unit tests (T002–T013): drive implementation via red-green-refactor
+- E2E tests (T014): verify integrated behaviour and expose UX gaps that inform T015 polish
+
+Guidelines:
+- [ ] Each spec must have a clear, explicit assertion (not just "no console errors")
+- [ ] Use `page.getByRole`, `page.getByText`, `page.getByLabel` over CSS selectors
+- [ ] E2E specs run in CI after unit tests pass
+- [ ] Failures in T014 create concrete scope for T015 — do not mark T015 complete until all E2E pass
 
 ---
 
@@ -103,7 +125,12 @@ e2e/
 ## Implementation Notes
 
 ### Mock backend approach
-Use a lightweight Express server at port 4000 in test mode, returning fixture data.
+Use a lightweight Express server at port 4000 in test mode. It must support:
+- Default: returns a full `ComparisonResponse` fixture (all 4 stores, 3 items, one unavailable item)
+- Configurable failure modes via query param or header: `?scenario=coles-fail`, `?scenario=all-fail`
+- Realistic partial failure: Coles returns 500, other stores succeed
+- Timeout simulation: one store takes 11s (exceeds 10s timeout)
+
 Configure in `playwright.config.ts`:
 ```typescript
 webServer: [
@@ -111,6 +138,14 @@ webServer: [
   { command: 'npm run mock-server', port: 4000, reuseExistingServer: true },
 ]
 ```
+
+The mock server must cover these scenarios for the 9 journeys:
+| Scenario | What it returns |
+|----------|----------------|
+| default | Full response: all 4 stores, prices vary, one item unavailable at Aldi |
+| `all-fail` | 503 — all stores unavailable |
+| `partial-fail` | Coles store marked as unavailable, others return data |
+| `empty-results` | All stores return empty matches for all items |
 
 ### Page object helpers
 Avoid repeating selector logic — extract into helpers:

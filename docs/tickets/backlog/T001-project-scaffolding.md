@@ -34,11 +34,13 @@ This is the single foundation ticket — everything else blocks on it.
 - [ ] `backend/` runs on port 4000
 - [ ] Vitest configured in `backend/` with a sample passing test
 - [ ] Vitest + React Testing Library configured in `frontend/` with a sample passing test
+- [ ] msw installed in both `backend/` and `frontend/` dev dependencies; `tests/setup.ts` created in each
 - [ ] Playwright configured with `playwright.config.ts` pointing at `http://localhost:3000`
 - [ ] shadcn/ui initialised in `frontend/` with Tailwind CSS
 - [ ] `npm run test` works from repo root (runs both backend and frontend unit tests)
 - [ ] `npm run test:e2e` runs Playwright
-- [ ] `.gitignore` covers `node_modules`, `.next`, `dist`
+- [ ] `.gitignore` covers `node_modules`, `.next`, `dist`, `.env`
+- [ ] `backend/.env.example` and `frontend/.env.example` committed
 - [ ] `README.md` documents how to run dev, test, and e2e
 
 ---
@@ -86,7 +88,45 @@ Run `npx shadcn@latest init` inside `frontend/` — choose: New York style, gree
 ### Playwright config
 - `testDir: './e2e'`
 - `baseURL: 'http://localhost:3000'`
-- `webServer` config to start both frontend (port 3000) and backend (port 4000) before tests
+- `webServer` config to start both frontend (port 3000) and a mock backend (port 4000) before tests
+
+### msw setup
+Install msw in both packages. Create handler entrypoints:
+- `backend/tests/setup.ts` — `setupServer()` from `msw/node`, export `server` for use in test files
+- `frontend/tests/setup.ts` — same pattern, import in `vitest.config.ts` as `setupFilesAfterEach`
+Verify msw intercepts work with a trivial test in both packages before marking T001 done.
+
+### Environment variable templates
+Create `.env.example` files in each package:
+
+`backend/.env.example`:
+```
+PORT=4000
+FRONTEND_ORIGIN=http://localhost:3000
+REQUEST_TIMEOUT_MS=10000
+COLES_SESSION_TTL_MS=300000
+RESULT_CACHE_TTL_MS=30000
+MAX_CONCURRENT_PER_STORE=2
+```
+
+`frontend/.env.example`:
+```
+NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
+```
+
+### Root workspace scripts
+Root `package.json` must include:
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "build": "npm run build --workspaces --if-present"
+  }
+}
+```
+Install `concurrently` as a root dev dependency for the `dev` script.
 
 ---
 

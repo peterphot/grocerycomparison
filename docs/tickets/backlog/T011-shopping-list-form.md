@@ -55,6 +55,11 @@ frontend ticket with no backend dependency.
 - [ ] Renders as a subtle row with "+" icon and "Add item" text
 - [ ] Calls `addItem` on click
 
+### Brand preference tip (mobile only)
+- [ ] Below the form, on mobile screens only (hidden on desktop): an info icon + text "Toggle brand preference on each item"
+- [ ] Styled in muted grey (#A1A1AA), Inter 12px
+- [ ] Uses Lucide `Info` icon at 14px
+
 ---
 
 ## TDD Requirements
@@ -92,6 +97,8 @@ describe('ShoppingListForm', () => {
   it('compare button is disabled when no item has a name')
   it('compare button calls onSubmit with current items')
   it('remove button hidden on last remaining item')
+  it('shows tip text on mobile viewport (390px width)')
+  it('hides tip text on desktop viewport (1440px width)')
 })
 ```
 
