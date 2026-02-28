@@ -17,8 +17,6 @@ interface ComparisonResultsProps {
 type TabKey = StoreColorKey;
 
 export function ComparisonResults({ response }: ComparisonResultsProps) {
-  if (response.storeTotals.length === 0) return null;
-
   const cheapestStore = useMemo(
     () => findCheapestStore(response.storeTotals),
     [response.storeTotals],
@@ -29,12 +27,14 @@ export function ComparisonResults({ response }: ComparisonResultsProps) {
     [response.storeTotals],
   );
 
-  const columnCount = response.storeTotals.length + 1;
-
   // Mobile tab state: stores + mix & match
   const [activeTab, setActiveTab] = useState<TabKey>(
     response.storeTotals[0]?.store ?? 'mixandmatch',
   );
+
+  if (response.storeTotals.length === 0) return null;
+
+  const columnCount = response.storeTotals.length + 1;
 
   const tabs: Array<{ key: TabKey; label: string }> = [
     ...response.storeTotals.map((st) => ({ key: st.store as TabKey, label: st.storeName })),
