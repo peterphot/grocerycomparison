@@ -1,14 +1,27 @@
 {
-  "feature": "pr2-review-fixes",
+  "feature": "grocery-comparison-mvp",
   "tickets": {
     "enabled": false,
-    "type": null,
+    "type": "local",
     "team": null,
     "sourceTicket": null,
     "mapping": {}
   },
   "tasks": {
-    "T001": { "status": "complete", "description": "Fix MSW intercepting supertest requests", "completed": "2026-02-28T14:54:00Z" },
-    "T002": { "status": "complete", "description": "Pin 'latest' versions in root package.json", "completed": "2026-02-28T14:55:00Z" }
+    "T001": { "status": "complete", "description": "Project scaffolding", "pr": "#2" },
+    "T002": { "status": "complete", "description": "Shared types & guards", "pr": "#3" },
+    "T003": { "status": "complete", "description": "Backend utilities (HTTP client, rate limiter, unit price)", "pr": "#5" },
+    "T004": { "status": "complete", "description": "Woolworths adapter", "pr": "#8" },
+    "T005": { "status": "complete", "description": "Coles adapter + session manager", "pr": "#9" },
+    "T006": { "status": "complete", "description": "Aldi adapter", "pr": "#10" },
+    "T007": { "status": "complete", "description": "Harris Farm adapter", "pr": "#11" },
+    "T008": { "status": "complete", "description": "Result builder", "pr": "#6" },
+    "T009": { "status": "complete", "description": "Search orchestrator", "pr": "#12" },
+    "T010": { "status": "complete", "description": "Express server & API route", "pr": "#13" },
+    "T011": { "status": "complete", "description": "Shopping list form", "pr": "#4" },
+    "T012": { "status": "complete", "description": "Comparison results components", "pr": "#7" },
+    "T013": { "status": "complete", "description": "Page integration & API client", "pr": "#14" },
+    "T014": { "status": "complete", "description": "Playwright E2E tests", "pr": "#15" },
+    "T015": { "status": "complete", "description": "Error handling & polish", "pr": "#16" }
   }
 }

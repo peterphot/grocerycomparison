@@ -1,9 +1,9 @@
 # T012 — Comparison Results Components
 
 ## Status
-- [x] Backlog
+- [ ] Backlog
 - [ ] In Progress
-- [ ] Completed
+- [x] Completed
 
 ## Created
 2026-02-28

@@ -1,9 +1,9 @@
 # T003 — Backend Utilities (HTTP Client, Rate Limiter, Unit Price)
 
 ## Status
-- [x] Backlog
+- [ ] Backlog
 - [ ] In Progress
-- [ ] Completed
+- [x] Completed
 
 ## Created
 2026-02-28

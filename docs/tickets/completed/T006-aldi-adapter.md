@@ -2,8 +2,8 @@
 
 ## Status
 - [x] Backlog
-- [ ] In Progress
-- [ ] Completed
+- [x] In Progress
+- [x] Completed
 
 ## Created
 2026-02-28

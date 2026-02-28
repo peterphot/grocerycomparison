@@ -1,9 +1,9 @@
 # T002 — Shared Types Package
 
 ## Status
-- [x] Backlog
+- [ ] Backlog
 - [ ] In Progress
-- [ ] Completed
+- [x] Completed
 
 ## Created
 2026-02-28

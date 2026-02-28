@@ -1,9 +1,9 @@
 # T001 — Project Scaffolding
 
 ## Status
-- [x] Backlog
+- [ ] Backlog
 - [ ] In Progress
-- [ ] Completed
+- [x] Completed
 
 ## Created
 2026-02-28
