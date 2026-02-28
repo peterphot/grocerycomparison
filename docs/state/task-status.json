@@ -1,5 +1,5 @@
 {
-  "feature": "grocery-price-comparison",
+  "feature": "pr2-review-fixes",
   "tickets": {
     "enabled": false,
     "type": null,
@@ -7,5 +7,8 @@
     "sourceTicket": null,
     "mapping": {}
   },
-  "tasks": {}
+  "tasks": {
+    "T001": { "status": "complete", "description": "Fix MSW intercepting supertest requests", "completed": "2026-02-28T14:54:00Z" },
+    "T002": { "status": "complete", "description": "Pin 'latest' versions in root package.json", "completed": "2026-02-28T14:55:00Z" }
+  }
 }
