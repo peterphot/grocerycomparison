@@ -1,8 +1,17 @@
 // Metric only — Australian market
+
+export type BaseUnit = 'g' | 'ml';
+export type UnitType = BaseUnit | 'each';
+
+export interface PackageSize {
+  qty: number;
+  unit: BaseUnit;
+}
+
 const MULTI_PACK_RE = /(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i;
 const SINGLE_RE = /(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i;
 
-function normalise(qty: number, unit: string): { qty: number; unit: string } | null {
+function normalise(qty: number, unit: string): PackageSize | null {
   const u = unit.toLowerCase();
   if (u === 'kg') return { qty: qty * 1000, unit: 'g' };
   if (u === 'l') return { qty: qty * 1000, unit: 'ml' };
@@ -11,7 +20,7 @@ function normalise(qty: number, unit: string): { qty: number; unit: string } | n
   return null;
 }
 
-export function parsePackageSize(sizeString: string): { qty: number; unit: string } | null {
+export function parsePackageSize(sizeString: string): PackageSize | null {
   let match = sizeString.match(MULTI_PACK_RE);
   if (match) {
     const count = parseFloat(match[1]);
@@ -28,8 +37,9 @@ export function parsePackageSize(sizeString: string): { qty: number; unit: strin
 export function computeDisplayUnitPrice(
   price: number,
   quantityInBaseUnit: number,
-  unit: string,
+  unit: UnitType,
 ): { unitPrice: number; unitMeasure: string } | null {
+  if (!Number.isFinite(price) || !Number.isFinite(quantityInBaseUnit)) return null;
   if (unit === 'each') {
     return { unitPrice: price, unitMeasure: 'each' };
   }
@@ -53,10 +63,11 @@ export function computeDisplayUnitPrice(
 export function computeNormalisedUnitPrice(
   price: number,
   quantityInBaseUnit: number,
-  unit: string,
+  unit: UnitType,
 ): number | null {
+  if (!Number.isFinite(price) || !Number.isFinite(quantityInBaseUnit)) return null;
   if (unit === 'each') return null;
   if (quantityInBaseUnit <= 0) return null;
-  // Always per 100 base units (100g or 100ml)
+  // Always per 100 base units (100g or 100ml) — 2dp for display, 3dp for normalised comparison
   return +((price / quantityInBaseUnit) * 100).toFixed(3);
 }

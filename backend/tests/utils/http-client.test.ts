@@ -98,4 +98,20 @@ describe('httpGet', () => {
     expect(error).toBeInstanceOf(StoreApiError);
     expect((error as StoreApiError).store).toBe('harrisfarm');
   }, 10_000);
+
+  it('throws non-retryable StoreApiError on invalid JSON response', async () => {
+    server.use(
+      http.get(TEST_URL, () => {
+        return new HttpResponse('not json', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }),
+    );
+
+    const error = await httpGet(TEST_URL, { store: 'woolworths' }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(StoreApiError);
+    expect((error as StoreApiError).message).toBe('Invalid JSON response');
+    expect((error as StoreApiError).isRetryable).toBe(false);
+  });
 });

@@ -103,8 +103,20 @@ describe('computeDisplayUnitPrice', () => {
     });
   });
 
-  it('returns null for unparseable unit', () => {
+  it('returns null for zero quantity', () => {
     expect(computeDisplayUnitPrice(5.0, 0, 'g')).toBeNull();
+  });
+
+  it('returns null for NaN price', () => {
+    expect(computeDisplayUnitPrice(NaN, 500, 'g')).toBeNull();
+  });
+
+  it('returns null for Infinity quantity', () => {
+    expect(computeDisplayUnitPrice(5.0, Infinity, 'ml')).toBeNull();
+  });
+
+  it('returns null for NaN quantity', () => {
+    expect(computeDisplayUnitPrice(5.0, NaN, 'g')).toBeNull();
   });
 });
 
@@ -127,5 +139,17 @@ describe('computeNormalisedUnitPrice', () => {
 
   it('returns null for count-based', () => {
     expect(computeNormalisedUnitPrice(2.99, 1, 'each')).toBeNull();
+  });
+
+  it('returns null for NaN price', () => {
+    expect(computeNormalisedUnitPrice(NaN, 500, 'g')).toBeNull();
+  });
+
+  it('returns null for Infinity price', () => {
+    expect(computeNormalisedUnitPrice(Infinity, 500, 'ml')).toBeNull();
+  });
+
+  it('returns null for NaN quantity', () => {
+    expect(computeNormalisedUnitPrice(5.0, NaN, 'g')).toBeNull();
   });
 });
