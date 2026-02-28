@@ -5,16 +5,25 @@ import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { ShoppingListForm } from '../components/shopping-list/ShoppingListForm';
 import { ComparisonResults } from '../components/results/ComparisonResults';
 import { Header } from '../components/common/Header';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { ComparisonSkeleton } from '../components/common/ComparisonSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
 import { searchGroceries } from '../lib/api';
+import { ApiError } from '../lib/errors';
 
 type PageState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'results'; data: ComparisonResponse }
   | { status: 'error'; message: string };
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 408) return 'This is taking longer than usual. Try again?';
+    if (error.status === 429) return 'Too many requests. Please wait a moment and try again.';
+  }
+  return "We couldn't reach any stores right now. Try again shortly.";
+}
 
 export default function Home(): React.ReactElement {
   const [pageState, setPageState] = useState<PageState>({ status: 'idle' });
@@ -33,9 +42,7 @@ export default function Home(): React.ReactElement {
       setPageState({ status: 'results', data });
     } catch (error) {
       if (controller.signal.aborted) return;
-      const message =
-        error instanceof Error ? error.message : 'An unexpected error occurred';
-      setPageState({ status: 'error', message });
+      setPageState({ status: 'error', message: getErrorMessage(error) });
     }
   };
 
@@ -70,7 +77,7 @@ export default function Home(): React.ReactElement {
         </div>
         <div className="flex-1 p-4">
           {pageState.status === 'idle' && <EmptyState />}
-          {pageState.status === 'loading' && <LoadingSpinner />}
+          {pageState.status === 'loading' && <ComparisonSkeleton />}
           {pageState.status === 'results' && (
             <ComparisonResults response={pageState.data} />
           )}
