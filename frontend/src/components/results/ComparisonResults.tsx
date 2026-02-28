@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import type { ComparisonResponse } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
 import { MixAndMatchColumn } from './MixAndMatchColumn';
-import { formatPrice } from '../../lib/utils';
+import { formatPrice, findCheapestStore } from '../../lib/utils';
 
 interface ComparisonResultsProps {
   response: ComparisonResponse;
@@ -10,11 +11,10 @@ interface ComparisonResultsProps {
 export function ComparisonResults({ response }: ComparisonResultsProps) {
   if (response.storeTotals.length === 0) return null;
 
-  const fullyAvailable = response.storeTotals.filter(st => st.allItemsAvailable);
-  const cheapestPool = fullyAvailable.length > 0 ? fullyAvailable : response.storeTotals;
-  const cheapestStore = cheapestPool.reduce((min, st) =>
-    st.total < min.total ? st : min
-  , cheapestPool[0]);
+  const cheapestStore = useMemo(
+    () => findCheapestStore(response.storeTotals),
+    [response.storeTotals],
+  );
 
   const columnCount = response.storeTotals.length + 1;
 

@@ -6,7 +6,8 @@ import { StoreColumn } from '../../src/components/results/StoreColumn';
 import { ItemRow } from '../../src/components/results/ItemRow';
 import { MixAndMatchColumn } from '../../src/components/results/MixAndMatchColumn';
 import { StoreHeader } from '../../src/components/results/StoreHeader';
-import { formatPrice, formatUnitPrice } from '../../src/lib/utils';
+import { ResultColumn } from '../../src/components/results/ResultColumn';
+import { formatPrice, formatUnitPrice, findCheapestStore } from '../../src/lib/utils';
 
 describe('ComparisonResults', () => {
   it('renders a column for each store', () => {
@@ -83,7 +84,7 @@ describe('ItemRow', () => {
   it('does not show unit price when unitPrice is null', () => {
     render(<ItemRow match={noUnitPriceItem.match} lineTotal={noUnitPriceItem.lineTotal} />);
     expect(screen.getByText('Coles Free Range Eggs 12pk')).toBeInTheDocument();
-    expect(screen.queryByText(/\$/)).not.toHaveTextContent('/ ');
+    expect(screen.queryByText(/\/ /)).not.toBeInTheDocument();
   });
 
   it('shows "Not available" when match is null', () => {
@@ -169,6 +170,40 @@ describe('StoreHeader', () => {
     render(<StoreHeader storeName="Aldi" store="aldi" isCheapest={false} />);
     const header = screen.getByText('Aldi');
     expect(header.className).not.toContain('ring-2');
+  });
+});
+
+describe('ResultColumn', () => {
+  it('renders header, children, and formatted total', () => {
+    render(
+      <ResultColumn header={<div>Test Header</div>} total={12.5}>
+        <div>Child Content</div>
+      </ResultColumn>
+    );
+    expect(screen.getByText('Test Header')).toBeInTheDocument();
+    expect(screen.getByText('Child Content')).toBeInTheDocument();
+    expect(screen.getByText('$12.50')).toBeInTheDocument();
+  });
+});
+
+describe('findCheapestStore', () => {
+  const storeTotals = mockComparisonResponse.storeTotals;
+
+  it('returns cheapest fully-available store', () => {
+    const result = findCheapestStore(storeTotals);
+    // Coles ($15.60) is cheapest among fully-available stores
+    expect(result.store).toBe('coles');
+  });
+
+  it('falls back to cheapest overall when none are fully available', () => {
+    const allPartial = storeTotals.map(st => ({ ...st, allItemsAvailable: false }));
+    const result = findCheapestStore(allPartial);
+    expect(result.store).toBe('aldi');
+  });
+
+  it('returns sole store when only one exists', () => {
+    const result = findCheapestStore([storeTotals[0]]);
+    expect(result.store).toBe('coles');
   });
 });
 
