@@ -27,7 +27,7 @@ export function buildStoreTotals(results: ItemSearchResult[]): StoreTotal[] {
   const totals = ALL_STORES.map((store) => {
     const items: StoreItemResult[] = results.map((result) => {
       const match = cheapestAvailableMatch(result.matches, store);
-      const lineTotal = match ? match.price * result.quantity : 0;
+      const lineTotal = match ? roundCents(match.price * result.quantity) : 0;
       return {
         shoppingListItemId: result.shoppingListItemId,
         shoppingListItemName: result.shoppingListItemName,

@@ -1,4 +1,4 @@
-import type { StoreName, ProductMatch, ItemSearchResult, ShoppingListItem } from '@grocery/shared';
+import type { ProductMatch, ItemSearchResult } from '@grocery/shared';
 
 export function makeMatch(overrides?: Partial<ProductMatch>): ProductMatch {
   return {
@@ -9,7 +9,7 @@ export function makeMatch(overrides?: Partial<ProductMatch>): ProductMatch {
     packageSize: '1L',
     unitPrice: 4.50,
     unitMeasure: 'L',
-    unitPriceNormalised: 0.45,
+    unitPriceNormalised: null,
     available: true,
     ...overrides,
   };
