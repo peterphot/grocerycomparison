@@ -1,6 +1,6 @@
 # Requirements: Backend CORS & Testability Fix
 
-## Status: IN PROGRESS
+## Status: COMPLETED
 
 ## Overview
 Fix two issues in the backend Express app: (1) wire up CORS middleware using the `FRONTEND_ORIGIN` env var, and (2) separate app creation from server startup so the app can be imported for testing without starting a listener.
