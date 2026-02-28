@@ -1,0 +1,21 @@
+import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
+import { ApiError } from './errors';
+
+export async function searchGroceries(
+  items: ShoppingListItem[],
+): Promise<ComparisonResponse> {
+  const response = await fetch('http://localhost:4000/api/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items }),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(
+      `Request failed with status ${response.status}`,
+      response.status,
+    );
+  }
+
+  return response.json();
+}
