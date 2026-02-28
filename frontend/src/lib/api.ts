@@ -11,7 +11,7 @@ export async function searchGroceries(
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
   if (signal) {
-    signal.addEventListener('abort', () => controller.abort());
+    signal.addEventListener('abort', () => controller.abort(), { once: true });
   }
 
   try {
@@ -31,10 +31,11 @@ export async function searchGroceries(
 
     return response.json() as Promise<ComparisonResponse>;
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new ApiError('timeout', 408);
-    }
-    if (err instanceof Error && err.name === 'AbortError') {
+    if (
+      (err instanceof DOMException || err instanceof Error) &&
+      err.name === 'AbortError'
+    ) {
+      if (signal?.aborted) throw err;
       throw new ApiError('timeout', 408);
     }
     throw err;
