@@ -1,0 +1,48 @@
+{
+  "resources": {
+    "results": {
+      "products": [
+        {
+          "id": 8561040585,
+          "title": "Harris Farm Farmer Friendly Lite Milk 2L",
+          "handle": "milk-lite-2l-harris-farm-88662",
+          "available": true,
+          "price": "3.10",
+          "price_max": "3.20",
+          "price_min": "3.10",
+          "tags": ["Dairy & Eggs", "Fridge", "Milk"],
+          "vendor": "HFM"
+        },
+        {
+          "id": 8561040586,
+          "title": "Harris Farm Greek Yoghurt 500g",
+          "handle": "yoghurt-greek-500g-harris-farm",
+          "available": true,
+          "price": "6.50",
+          "price_max": "6.50",
+          "price_min": "6.50",
+          "tags": ["Dairy & Eggs", "Fridge"],
+          "vendor": "HFM"
+        },
+        {
+          "id": 8561040587,
+          "title": "Seasonal Fruit Box Assorted",
+          "handle": "seasonal-fruit-box",
+          "available": true,
+          "price": "35.00",
+          "tags": ["Fruit"],
+          "vendor": "HFM"
+        },
+        {
+          "id": 8561040588,
+          "title": "Harris Farm Organic Milk 1L",
+          "handle": "organic-milk-1l",
+          "available": false,
+          "price": "4.50",
+          "tags": ["Dairy & Eggs"],
+          "vendor": "HFM"
+        }
+      ]
+    }
+  }
+}
