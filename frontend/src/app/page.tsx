@@ -19,14 +19,20 @@ type PageState =
 export default function Home(): React.ReactElement {
   const [pageState, setPageState] = useState<PageState>({ status: 'idle' });
   const lastItemsRef = useRef<ShoppingListItem[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
 
   const handleSubmit = async (items: ShoppingListItem[]) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     lastItemsRef.current = items;
     setPageState({ status: 'loading' });
     try {
-      const data = await searchGroceries(items);
+      const data = await searchGroceries(items, controller.signal);
       setPageState({ status: 'results', data });
     } catch (error) {
+      if (controller.signal.aborted) return;
       const message =
         error instanceof Error ? error.message : 'An unexpected error occurred';
       setPageState({ status: 'error', message });
@@ -38,6 +44,7 @@ export default function Home(): React.ReactElement {
   };
 
   const handleEditList = () => {
+    abortRef.current?.abort();
     setPageState({ status: 'idle' });
   };
 
@@ -47,7 +54,10 @@ export default function Home(): React.ReactElement {
       <div className="flex flex-col md:flex-row flex-1">
         <div className="w-full md:w-[420px] p-4">
           {pageState.status !== 'results' && (
-            <ShoppingListForm onSubmit={handleSubmit} />
+            <ShoppingListForm
+              onSubmit={handleSubmit}
+              initialItems={lastItemsRef.current.length > 0 ? lastItemsRef.current : undefined}
+            />
           )}
           {pageState.status === 'results' && (
             <button

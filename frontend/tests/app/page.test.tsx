@@ -47,7 +47,7 @@ describe('HomePage', () => {
       screen.getByText('Compare prices in seconds'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Add items above and click Compare Prices'),
+      screen.getByText('Add items to your list and click Compare Prices'),
     ).toBeInTheDocument();
   });
 

@@ -7,10 +7,11 @@ import type { ShoppingListItem as ShoppingListItemType } from '../../hooks/useSh
 
 interface ShoppingListFormProps {
   onSubmit: (items: ShoppingListItemType[]) => void;
+  initialItems?: ShoppingListItemType[];
 }
 
-export function ShoppingListForm({ onSubmit }: ShoppingListFormProps) {
-  const { items, addItem, removeItem, updateItem, canSearch } = useShoppingList();
+export function ShoppingListForm({ onSubmit, initialItems }: ShoppingListFormProps) {
+  const { items, addItem, removeItem, updateItem, canSearch } = useShoppingList(initialItems);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
