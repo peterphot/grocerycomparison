@@ -4,12 +4,16 @@ import { formatPrice, formatUnitPrice } from '../../lib/utils';
 interface ItemRowProps {
   match: ProductMatch | null;
   lineTotal: number;
+  shoppingListItemName?: string;
 }
 
-export function ItemRow({ match, lineTotal }: ItemRowProps) {
+export function ItemRow({ match, lineTotal, shoppingListItemName }: ItemRowProps) {
   if (!match) {
     return (
       <div className="py-2 px-3 border-b border-zinc-100">
+        {shoppingListItemName && (
+          <p className="text-xs font-medium text-zinc-700 mb-0.5">{shoppingListItemName}</p>
+        )}
         <p className="text-sm text-zinc-400 italic">Not available</p>
       </div>
     );
@@ -17,6 +21,9 @@ export function ItemRow({ match, lineTotal }: ItemRowProps) {
 
   return (
     <div className="py-2 px-3 border-b border-zinc-100">
+      {shoppingListItemName && (
+        <p className="text-xs font-medium text-zinc-700 mb-0.5">{shoppingListItemName}</p>
+      )}
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-zinc-900">{match.productName}</p>

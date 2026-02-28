@@ -82,6 +82,24 @@ describe('ShoppingListForm', () => {
     expect(removeButtons).toHaveLength(0);
   });
 
+  it('filters out empty-name items before calling onSubmit', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ShoppingListForm onSubmit={onSubmit} />);
+    // Add a second item
+    await user.click(screen.getByRole('button', { name: /add item/i }));
+    const nameInputs = screen.getAllByPlaceholderText('e.g. milk 2L');
+    // Fill only the first item
+    await user.type(nameInputs[0], 'milk');
+    // Leave the second item empty
+    await user.click(screen.getByRole('button', { name: /compare prices/i }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    const submittedItems = onSubmit.mock.calls[0][0];
+    // Only the non-empty item should be submitted
+    expect(submittedItems).toHaveLength(1);
+    expect(submittedItems[0]).toMatchObject({ name: 'milk' });
+  });
+
   it('toggling brand checkbox updates item', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();

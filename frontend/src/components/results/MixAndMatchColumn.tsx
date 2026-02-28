@@ -14,7 +14,12 @@ export function MixAndMatchColumn({ mixAndMatch }: MixAndMatchColumnProps) {
       total={mixAndMatch.total}
     >
       {mixAndMatch.items.map((item) => (
-        <ItemRow key={item.shoppingListItemId} match={item.cheapestMatch} lineTotal={item.lineTotal} />
+        <ItemRow
+          key={item.shoppingListItemId}
+          match={item.cheapestMatch}
+          lineTotal={item.lineTotal}
+          shoppingListItemName={item.shoppingListItemName}
+        />
       ))}
     </ResultColumn>
   );

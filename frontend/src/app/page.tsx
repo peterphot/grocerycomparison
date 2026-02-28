@@ -60,20 +60,21 @@ export default function Home(): React.ReactElement {
       <Header />
       <div className="flex flex-col md:flex-row flex-1">
         <div className="w-full md:w-[420px] p-4">
-          {pageState.status !== 'results' && (
-            <ShoppingListForm
-              onSubmit={handleSubmit}
-              initialItems={lastItemsRef.current.length > 0 ? lastItemsRef.current : undefined}
-            />
-          )}
+          {/* On desktop: form is always visible. On mobile with results: show Edit List toggle */}
           {pageState.status === 'results' && (
             <button
               onClick={handleEditList}
-              className="px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-200"
+              className="md:hidden mb-3 px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-200"
             >
               Edit List
             </button>
           )}
+          <div className={pageState.status === 'results' ? 'hidden md:block' : ''}>
+            <ShoppingListForm
+              onSubmit={handleSubmit}
+              initialItems={lastItemsRef.current.length > 0 ? lastItemsRef.current : undefined}
+            />
+          </div>
         </div>
         <div className="flex-1 p-4">
           {pageState.status === 'idle' && <EmptyState />}

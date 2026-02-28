@@ -16,7 +16,8 @@ export function ShoppingListForm({ onSubmit, initialItems }: ShoppingListFormPro
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (canSearch) {
-      onSubmit(items);
+      const nonEmptyItems = items.filter((item) => item.name.trim().length > 0);
+      onSubmit(nonEmptyItems);
     }
   };
 

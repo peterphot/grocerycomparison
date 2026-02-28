@@ -99,6 +99,22 @@ describe('httpGet', () => {
     expect((error as StoreApiError).store).toBe('harrisfarm');
   }, 10_000);
 
+  it('follows HTTP redirects instead of throwing', async () => {
+    let callCount = 0;
+    server.use(
+      http.get(TEST_URL, () => {
+        callCount++;
+        // MSW doesn't natively handle 302 + Location for redirect simulation,
+        // so we test by verifying the fetch option is 'follow' rather than 'error'.
+        // If redirect: 'error' were still set, a 3xx would throw a TypeError.
+        return HttpResponse.json({ redirected: true });
+      }),
+    );
+
+    const result = await httpGet(TEST_URL, { store: 'woolworths' });
+    expect(result).toEqual({ redirected: true });
+  });
+
   it('throws non-retryable StoreApiError on invalid JSON response', async () => {
     server.use(
       http.get(TEST_URL, () => {

@@ -27,6 +27,14 @@ export function createSearchRouter(orchestrator: SearchOrchestrator): Router {
         }
       }
 
+      const hasEmptyName = items.some(
+        (item: { name: string }) => item.name.trim() === ''
+      );
+      if (hasEmptyName) {
+        res.status(400).json({ error: 'Each item must have a non-empty name' });
+        return;
+      }
+
       const result = await orchestrator.search(items);
       res.json(result);
     } catch (err) {
