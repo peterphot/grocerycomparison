@@ -1,0 +1,37 @@
+{
+  "meta": { "pagination": { "offset": 0, "limit": 12, "totalCount": 3 } },
+  "data": [
+    {
+      "sku": "000000000000567890",
+      "name": "Farmdale Full Cream Milk 2L",
+      "brandName": "FARMDALE",
+      "sellingSize": "2L",
+      "notForSale": false,
+      "price": { "amount": 269, "amountRelevantDisplay": "$2.69", "currencyCode": "AUD" }
+    },
+    {
+      "sku": "000000000000567891",
+      "name": "Farmdale Thickened Cream 300ml",
+      "brandName": "FARMDALE",
+      "sellingSize": "300ml",
+      "notForSale": false,
+      "price": { "amount": 215, "amountRelevantDisplay": "$2.15", "currencyCode": "AUD" }
+    },
+    {
+      "sku": "000000000000545135",
+      "name": "Milk Frother",
+      "brandName": "EXPRESSI",
+      "sellingSize": null,
+      "notForSale": true,
+      "price": { "amount": 3199, "amountRelevantDisplay": "$31.99", "currencyCode": "AUD" }
+    },
+    {
+      "sku": "000000000000567892",
+      "name": "Specialty Cheese Selection",
+      "brandName": "EMPORIUM",
+      "sellingSize": "assorted",
+      "notForSale": false,
+      "price": { "amount": 899, "amountRelevantDisplay": "$8.99", "currencyCode": "AUD" }
+    }
+  ]
+}
