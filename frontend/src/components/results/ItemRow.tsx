@@ -1,12 +1,13 @@
-import type { StoreItemResult } from '@grocery/shared';
+import type { ProductMatch } from '@grocery/shared';
 import { formatPrice, formatUnitPrice } from '../../lib/utils';
 
 interface ItemRowProps {
-  item: StoreItemResult;
+  match: ProductMatch | null;
+  lineTotal: number;
 }
 
-export function ItemRow({ item }: ItemRowProps) {
-  if (!item.match) {
+export function ItemRow({ match, lineTotal }: ItemRowProps) {
+  if (!match) {
     return (
       <div className="py-2 px-3 border-b border-zinc-100">
         <p className="text-sm text-zinc-400 italic">Not available</p>
@@ -18,13 +19,13 @@ export function ItemRow({ item }: ItemRowProps) {
     <div className="py-2 px-3 border-b border-zinc-100">
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-sm font-medium text-zinc-900">{item.match.productName}</p>
-          <p className="text-xs text-zinc-500">{item.match.packageSize}</p>
-          {item.match.unitPrice !== null && item.match.unitMeasure !== null && (
-            <p className="text-xs text-zinc-400">{formatUnitPrice(item.match.unitPrice, item.match.unitMeasure)}</p>
+          <p className="text-sm font-medium text-zinc-900">{match.productName}</p>
+          <p className="text-xs text-zinc-500">{match.packageSize}</p>
+          {match.unitPrice !== null && match.unitMeasure !== null && (
+            <p className="text-xs text-zinc-400">{formatUnitPrice(match.unitPrice, match.unitMeasure)}</p>
           )}
         </div>
-        <p className="text-sm font-semibold text-zinc-900">{formatPrice(item.lineTotal)}</p>
+        <p className="text-sm font-semibold text-zinc-900">{formatPrice(lineTotal)}</p>
       </div>
     </div>
   );

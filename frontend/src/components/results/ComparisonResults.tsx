@@ -8,6 +8,8 @@ interface ComparisonResultsProps {
 }
 
 export function ComparisonResults({ response }: ComparisonResultsProps) {
+  if (response.storeTotals.length === 0) return null;
+
   const cheapestStore = response.storeTotals.reduce((min, st) =>
     st.total < min.total ? st : min
   , response.storeTotals[0]);
