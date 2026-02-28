@@ -60,7 +60,7 @@ export class WoolworthsAdapter implements StoreAdapter {
   }
 
   private normaliseMeasure(cupMeasure: string): string {
-    // "1L" -> "L", "100g" -> "100g", "100ml" -> "100ml"
-    return cupMeasure.replace(/^1(?=[A-Z])/, '').replace(/^1(?=L$)/i, '') || cupMeasure;
+    // "1L" -> "L", "1kg" -> "kg", "100g" -> "100g", "100ml" -> "100ml"
+    return cupMeasure.replace(/^1(?=[a-zA-Z])/, '') || cupMeasure;
   }
 }

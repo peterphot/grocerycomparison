@@ -5,8 +5,6 @@ import { WoolworthsAdapter } from '../../src/adapters/woolworths';
 import { StoreApiError } from '@grocery/shared';
 import fixture from '../fixtures/woolworths-milk.json';
 
-const SEARCH_URL = 'https://www.woolworths.com.au/apis/ui/Search/products*';
-
 function mockSearchSuccess(body: unknown = fixture) {
   server.use(
     http.get('https://www.woolworths.com.au/apis/ui/Search/products', () => {
