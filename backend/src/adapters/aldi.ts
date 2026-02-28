@@ -1,5 +1,5 @@
 import type { ProductMatch } from '@grocery/shared';
-import { httpGet } from '../utils/http-client';
+import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeDisplayUnitPrice, computeNormalisedUnitPrice } from '../utils/unit-price';
 import type { StoreAdapter } from './store-adapter';
 
@@ -19,15 +19,20 @@ interface AldiResponse {
 export class AldiAdapter implements StoreAdapter {
   readonly storeName = 'aldi' as const;
   readonly displayName = 'Aldi';
+  private client: StoreClient;
 
   private static readonly HEADERS = {
     Origin: 'https://www.aldi.com.au',
     Referer: 'https://www.aldi.com.au/',
   };
 
+  constructor(client?: StoreClient) {
+    this.client = client ?? createStoreClient(this.storeName);
+  }
+
   async searchProduct(query: string): Promise<ProductMatch[]> {
     const url = `https://api.aldi.com.au/v3/product-search?q=${encodeURIComponent(query)}&serviceType=walk-in`;
-    const data = await httpGet<AldiResponse>(url, { store: this.storeName, headers: AldiAdapter.HEADERS });
+    const data = await this.client.get<AldiResponse>(url, { headers: AldiAdapter.HEADERS });
     return (data.data || [])
       .filter(p => !p.notForSale)
       .map(p => this.mapProduct(p));

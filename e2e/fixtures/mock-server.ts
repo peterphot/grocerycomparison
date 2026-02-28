@@ -31,6 +31,15 @@ app.post('/api/search', (req, res) => {
     }
   }
 
+  // Validate non-empty item names
+  const hasEmptyName = items.some(
+    (item: { name: string }) => item.name.trim() === ''
+  );
+  if (hasEmptyName) {
+    res.status(400).json({ error: 'Each item must have a non-empty name' });
+    return;
+  }
+
   // Single item: return quantity-aware response
   if (items.length === 1) {
     const quantity = items[0]?.quantity ?? 1;

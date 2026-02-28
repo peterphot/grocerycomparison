@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { ShoppingListForm } from '../components/shopping-list/ShoppingListForm';
 import { ComparisonResults } from '../components/results/ComparisonResults';
@@ -30,7 +30,7 @@ export default function Home(): React.ReactElement {
   const lastItemsRef = useRef<ShoppingListItem[]>([]);
   const abortRef = useRef<AbortController | null>(null);
 
-  const handleSubmit = async (items: ShoppingListItem[]) => {
+  const handleSubmit = useCallback(async (items: ShoppingListItem[]) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -44,32 +44,29 @@ export default function Home(): React.ReactElement {
       if (controller.signal.aborted) return;
       setPageState({ status: 'error', message: getErrorMessage(error) });
     }
-  };
+  }, []);
 
-  const handleRetry = () => {
-    handleSubmit(lastItemsRef.current);
-  };
+  const handleRetry = useCallback(() => {
+    void handleSubmit(lastItemsRef.current);
+  }, [handleSubmit]);
 
-  const handleEditList = () => {
+  const handleEditList = useCallback(() => {
     abortRef.current?.abort();
     setPageState({ status: 'idle' });
-  };
+  }, []);
+
+  const isResults = pageState.status === 'results';
 
   return (
-    <main className="min-h-screen flex flex-col">
-      <Header />
+    <main className="min-h-screen flex flex-col bg-[#F6FAF6]">
+      <Header
+        showEdit={isResults}
+        onEditList={handleEditList}
+      />
       <div className="flex flex-col md:flex-row flex-1">
         <div className="w-full md:w-[420px] p-4">
-          {/* On desktop: form is always visible. On mobile with results: show Edit List toggle */}
-          {pageState.status === 'results' && (
-            <button
-              onClick={handleEditList}
-              className="md:hidden mb-3 px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-200"
-            >
-              Edit List
-            </button>
-          )}
-          <div className={pageState.status === 'results' ? 'hidden md:block' : ''}>
+          {/* On mobile with results: form is hidden (use Edit button in header) */}
+          <div className={isResults ? 'hidden md:block' : ''}>
             <ShoppingListForm
               onSubmit={handleSubmit}
               initialItems={lastItemsRef.current.length > 0 ? lastItemsRef.current : undefined}
@@ -80,7 +77,11 @@ export default function Home(): React.ReactElement {
           {pageState.status === 'idle' && <EmptyState />}
           {pageState.status === 'loading' && <ComparisonSkeleton />}
           {pageState.status === 'results' && (
-            <ComparisonResults response={pageState.data} />
+            <ComparisonResults
+              response={pageState.data}
+              items={lastItemsRef.current}
+              onEditList={handleEditList}
+            />
           )}
           {pageState.status === 'error' && (
             <ErrorBanner

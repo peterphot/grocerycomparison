@@ -1,8 +1,43 @@
+import { ShoppingCart } from 'lucide-react';
+import { ALL_STORE_KEYS, STORE_DISPLAY_NAMES, STORE_COLORS } from '../../lib/store-colors';
+
+const STORE_BADGES = ALL_STORE_KEYS.map((store) => ({
+  name: STORE_DISPLAY_NAMES[store],
+  color: STORE_COLORS[store],
+}));
+
 export function EmptyState(): React.ReactElement {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <h2 className="text-xl font-semibold text-zinc-700">Compare prices in seconds</h2>
-      <p className="text-zinc-500 mt-2">Add items to your list and click Compare Prices</p>
+    <div className="flex items-center justify-center py-12">
+      <div className="w-full max-w-[480px] bg-white rounded-[20px] shadow p-12 flex flex-col items-center text-center">
+        {/* Green circle with cart icon */}
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <ShoppingCart size={36} className="text-green-600" />
+        </div>
+
+        {/* Heading */}
+        <h2 className="text-2xl font-bold text-zinc-900 font-[family-name:var(--font-plus-jakarta)]">
+          Start comparing prices
+        </h2>
+
+        {/* Description */}
+        <p className="text-sm text-zinc-500 mt-3 leading-relaxed max-w-sm">
+          Add items to your shopping list and click Compare Prices to see the cheapest options across Woolworths, Coles, Aldi, and Harris Farm.
+        </p>
+
+        {/* Store badges */}
+        <div className="flex flex-wrap gap-2 mt-6 justify-center">
+          {STORE_BADGES.map((store) => (
+            <span
+              key={store.name}
+              className="px-3 py-1 rounded-full text-xs font-medium text-white"
+              style={{ backgroundColor: store.color }}
+            >
+              {store.name}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

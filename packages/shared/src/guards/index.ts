@@ -50,7 +50,6 @@ export function isComparisonResponse(value: unknown): value is ComparisonRespons
 
   if (!Array.isArray(value.storeTotals)) return false;
   if (!isObject(value.mixAndMatch)) return false;
-  if (!Array.isArray(value.searchResults)) return false;
 
   const mix = value.mixAndMatch as Record<string, unknown>;
   if (!Array.isArray(mix.items)) return false;

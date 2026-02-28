@@ -59,5 +59,4 @@ export const mockComparisonResponse: ComparisonResponse = {
     ],
     total: 11.97,
   },
-  searchResults: [],
 };

@@ -285,7 +285,7 @@ describe('buildMixAndMatch', () => {
 });
 
 describe('buildComparisonResponse', () => {
-  it('assembles storeTotals, mixAndMatch, and searchResults', () => {
+  it('assembles storeTotals and mixAndMatch', () => {
     const results = [
       makeSearchResult({
         matches: [
@@ -297,8 +297,6 @@ describe('buildComparisonResponse', () => {
     const response = buildComparisonResponse(results);
     expect(response).toHaveProperty('storeTotals');
     expect(response).toHaveProperty('mixAndMatch');
-    expect(response).toHaveProperty('searchResults');
-    expect(response.searchResults).toBe(results);
     expect(response.storeTotals).toBeInstanceOf(Array);
     expect(response.mixAndMatch).toHaveProperty('items');
     expect(response.mixAndMatch).toHaveProperty('total');
