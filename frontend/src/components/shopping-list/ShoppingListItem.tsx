@@ -25,6 +25,7 @@ export function ShoppingListItem({ item, onChange, onRemove, showRemove }: Shopp
         value={item.quantity}
         onChange={(e) => onChange(item.id, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
         min={1}
+        aria-label="Quantity"
         className="w-16 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-center outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
       />
       <label className="flex items-center gap-1.5 text-sm text-zinc-500 cursor-pointer">
@@ -34,7 +35,8 @@ export function ShoppingListItem({ item, onChange, onRemove, showRemove }: Shopp
           onChange={(e) => onChange(item.id, { isBrandSpecific: e.target.checked })}
           className="rounded border-zinc-300 text-green-600 focus:ring-green-500"
         />
-        <span className="hidden sm:inline">Brand matters</span>
+        <span className="sr-only">Brand matters</span>
+        <span className="hidden sm:inline" aria-hidden="true">Brand matters</span>
       </label>
       {showRemove && (
         <button

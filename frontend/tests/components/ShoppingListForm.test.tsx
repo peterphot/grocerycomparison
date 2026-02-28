@@ -81,4 +81,23 @@ describe('ShoppingListForm', () => {
     const removeButtons = screen.queryAllByRole('button', { name: /remove/i });
     expect(removeButtons).toHaveLength(0);
   });
+
+  it('toggling brand checkbox updates item', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ShoppingListForm onSubmit={onSubmit} />);
+    const nameInput = screen.getByPlaceholderText('e.g. milk 2L');
+    await user.type(nameInput, 'oat milk');
+    const brandCheckbox = screen.getByRole('checkbox', { name: /brand matters/i });
+    expect(brandCheckbox).not.toBeChecked();
+    await user.click(brandCheckbox);
+    expect(brandCheckbox).toBeChecked();
+    // Verify the toggled state is included in submit
+    await user.click(screen.getByRole('button', { name: /compare prices/i }));
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'oat milk', isBrandSpecific: true }),
+      ])
+    );
+  });
 });
