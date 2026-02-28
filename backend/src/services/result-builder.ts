@@ -97,6 +97,5 @@ export function buildComparisonResponse(results: ItemSearchResult[]): Comparison
   return {
     storeTotals: buildStoreTotals(results),
     mixAndMatch: buildMixAndMatch(results),
-    searchResults: results,
   };
 }

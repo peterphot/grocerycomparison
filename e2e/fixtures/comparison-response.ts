@@ -130,7 +130,6 @@ export const defaultResponse: ComparisonResponse = {
     ],
     total: MILK.aldi.price + requireProduct(BREAD, 'coles').price,
   },
-  searchResults: [],
 };
 
 /**
@@ -151,6 +150,5 @@ export function buildQuantityResponse(quantity: number): ComparisonResponse {
       ],
       total: MILK.aldi.price * quantity,
     },
-    searchResults: [],
   };
 }

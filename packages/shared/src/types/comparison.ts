@@ -1,4 +1,4 @@
-import type { StoreName, ProductMatch, ItemSearchResult } from './product.js';
+import type { StoreName, ProductMatch } from './product.js';
 
 export interface StoreItemResult {
   shoppingListItemId: string;
@@ -33,5 +33,4 @@ export interface MixAndMatchResult {
 export interface ComparisonResponse {
   storeTotals: StoreTotal[];
   mixAndMatch: MixAndMatchResult;
-  searchResults: ItemSearchResult[];
 }

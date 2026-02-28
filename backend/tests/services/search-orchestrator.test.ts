@@ -79,11 +79,9 @@ describe('SearchOrchestrator', () => {
 
       expect(result).toHaveProperty('storeTotals');
       expect(result).toHaveProperty('mixAndMatch');
-      expect(result).toHaveProperty('searchResults');
-      expect(result.searchResults).toHaveLength(1);
-      expect(result.searchResults[0].shoppingListItemId).toBe('item-1');
-      expect(result.searchResults[0].shoppingListItemName).toBe('milk');
-      expect(result.searchResults[0].matches.length).toBeGreaterThanOrEqual(4);
+      expect(result.storeTotals).toHaveLength(4);
+      expect(result.storeTotals[0].items[0].shoppingListItemId).toBe('item-1');
+      expect(result.storeTotals[0].items[0].shoppingListItemName).toBe('milk');
     });
 
     it('selects cheapest match for brand-agnostic items', async () => {
@@ -100,12 +98,11 @@ describe('SearchOrchestrator', () => {
       const items = [makeItem({ isBrandSpecific: false })];
 
       const result = await orchestrator.search(items);
-      // For brand-agnostic: all matches should be included, result-builder handles cheapest selection
-      // But the orchestrator should include all matches so result-builder can pick
-      const woolworthsMatches = result.searchResults[0].matches.filter(
-        (m: ProductMatch) => m.store === 'woolworths'
-      );
-      expect(woolworthsMatches).toHaveLength(2);
+      // For brand-agnostic: result-builder picks the cheapest match per store
+      const woolworths = result.storeTotals.find((st: any) => st.store === 'woolworths');
+      // cheapest woolworths product ($2) should be selected
+      expect(woolworths!.items[0].match!.price).toBe(2.00);
+      expect(woolworths!.items[0].match!.productName).toBe('Cheap Milk');
     });
 
     it('selects first match for brand-specific items', async () => {
@@ -125,17 +122,12 @@ describe('SearchOrchestrator', () => {
       const items = [makeItem({ isBrandSpecific: true })];
 
       const result = await orchestrator.search(items);
-      // For brand-specific: only include first match per store (API-relevance order)
-      const woolworthsMatches = result.searchResults[0].matches.filter(
-        (m: ProductMatch) => m.store === 'woolworths'
-      );
-      const colesMatches = result.searchResults[0].matches.filter(
-        (m: ProductMatch) => m.store === 'coles'
-      );
-      expect(woolworthsMatches).toHaveLength(1);
-      expect(woolworthsMatches[0].productName).toBe('Brand A Milk');
-      expect(colesMatches).toHaveLength(1);
-      expect(colesMatches[0].productName).toBe('Brand A Milk');
+      // For brand-specific: only first match per store (API-relevance order) is used
+      const woolworths = result.storeTotals.find((st: any) => st.store === 'woolworths');
+      const coles = result.storeTotals.find((st: any) => st.store === 'coles');
+      // Only first match is considered, so Brand A ($5) for woolworths, Brand A ($4) for coles
+      expect(woolworths!.items[0].match!.productName).toBe('Brand A Milk');
+      expect(coles!.items[0].match!.productName).toBe('Brand A Milk');
     });
 
     it('returns partial results when one adapter fails', async () => {
@@ -152,17 +144,13 @@ describe('SearchOrchestrator', () => {
 
       // Should still return a valid response
       expect(result).toHaveProperty('storeTotals');
-      expect(result).toHaveProperty('searchResults');
-      // Should have matches from working stores but not from coles
-      const colesMatches = result.searchResults[0].matches.filter(
-        (m: ProductMatch) => m.store === 'coles'
-      );
-      expect(colesMatches).toHaveLength(0);
-      // But other stores should have matches
-      const woolworthsMatches = result.searchResults[0].matches.filter(
-        (m: ProductMatch) => m.store === 'woolworths'
-      );
-      expect(woolworthsMatches).toHaveLength(1);
+      expect(result).toHaveProperty('mixAndMatch');
+      // Coles should have no match (adapter failed)
+      const coles = result.storeTotals.find((st: any) => st.store === 'coles');
+      expect(coles!.items[0].match).toBeNull();
+      // Woolworths should have a match
+      const woolworths = result.storeTotals.find((st: any) => st.store === 'woolworths');
+      expect(woolworths!.items[0].match).not.toBeNull();
     });
 
     it('marks all items as unavailable for a failed store', async () => {
@@ -189,12 +177,11 @@ describe('SearchOrchestrator', () => {
 
       const result = await orchestrator.search(items);
 
-      // Both items should have no coles matches
-      for (const searchResult of result.searchResults) {
-        const colesMatches = searchResult.matches.filter(
-          (m: ProductMatch) => m.store === 'coles'
-        );
-        expect(colesMatches).toHaveLength(0);
+      // Coles should have all items unavailable
+      const coles = result.storeTotals.find((st: any) => st.store === 'coles');
+      expect(coles!.unavailableCount).toBe(2);
+      for (const item of coles!.items) {
+        expect(item.match).toBeNull();
       }
     });
 

@@ -1,5 +1,5 @@
 import type { ProductMatch } from '@grocery/shared';
-import { httpGet } from '../utils/http-client.js';
+import { createStoreClient, type StoreClient } from '../utils/store-client.js';
 import { parsePackageSize, computeDisplayUnitPrice, computeNormalisedUnitPrice } from '../utils/unit-price.js';
 import type { StoreAdapter } from './store-adapter.js';
 
@@ -20,10 +20,15 @@ interface ShopifySuggestResponse {
 export class HarrisFarmAdapter implements StoreAdapter {
   readonly storeName = 'harrisfarm' as const;
   readonly displayName = 'Harris Farm';
+  private client: StoreClient;
+
+  constructor(client?: StoreClient) {
+    this.client = client ?? createStoreClient(this.storeName);
+  }
 
   async searchProduct(query: string): Promise<ProductMatch[]> {
     const url = `https://www.harrisfarm.com.au/search/suggest.json?q=${encodeURIComponent(query)}&resources[type]=product&resources[limit]=10`;
-    const data = await httpGet<ShopifySuggestResponse>(url, { store: this.storeName });
+    const data = await this.client.get<ShopifySuggestResponse>(url);
     return (data.resources?.results?.products || [])
       .filter(p => p.available)
       .map(p => this.mapProduct(p));

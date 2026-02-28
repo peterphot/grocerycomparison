@@ -11,7 +11,6 @@ import type {
   StoreName,
   StoreTotal,
   MixAndMatchResult,
-  ItemSearchResult,
 } from '../src/types/index.js';
 
 // ---------------------------------------------------------------------------
@@ -75,20 +74,10 @@ function validMixAndMatch(): MixAndMatchResult {
   };
 }
 
-function validItemSearchResult(): ItemSearchResult {
-  return {
-    shoppingListItemId: 'item-1',
-    shoppingListItemName: 'Full Cream Milk 2L',
-    quantity: 2,
-    matches: [validProductMatch()],
-  };
-}
-
 function validComparisonResponse(): ComparisonResponse {
   return {
     storeTotals: [validStoreTotal()],
     mixAndMatch: validMixAndMatch(),
-    searchResults: [validItemSearchResult()],
   };
 }
 
@@ -251,11 +240,10 @@ describe('isComparisonResponse', () => {
     expect(isComparisonResponse(validComparisonResponse())).toBe(true);
   });
 
-  it('returns true for empty arrays in storeTotals and searchResults', () => {
+  it('returns true for empty arrays in storeTotals', () => {
     const response: ComparisonResponse = {
       storeTotals: [],
       mixAndMatch: { items: [], total: 0 },
-      searchResults: [],
     };
     expect(isComparisonResponse(response)).toBe(true);
   });
@@ -272,22 +260,12 @@ describe('isComparisonResponse', () => {
     expect(isComparisonResponse(response)).toBe(false);
   });
 
-  it('returns false when searchResults is missing', () => {
-    const response = { ...validComparisonResponse() } as Record<string, unknown>;
-    delete response.searchResults;
-    expect(isComparisonResponse(response)).toBe(false);
-  });
-
   it('returns false when storeTotals is not an array', () => {
     expect(isComparisonResponse({ ...validComparisonResponse(), storeTotals: 'not array' })).toBe(false);
   });
 
   it('returns false when mixAndMatch is not an object', () => {
     expect(isComparisonResponse({ ...validComparisonResponse(), mixAndMatch: 'not object' })).toBe(false);
-  });
-
-  it('returns false when searchResults is not an array', () => {
-    expect(isComparisonResponse({ ...validComparisonResponse(), searchResults: 42 })).toBe(false);
   });
 
   it('returns false when mixAndMatch.items is missing', () => {

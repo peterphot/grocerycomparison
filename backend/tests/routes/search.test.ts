@@ -30,7 +30,6 @@ const validItem = {
 const fakeComparisonResponse = {
   storeTotals: [],
   mixAndMatch: { items: [], total: 0 },
-  searchResults: [],
 };
 
 describe('POST /api/search', () => {

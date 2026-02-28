@@ -1,6 +1,6 @@
 import type { ProductMatch } from '@grocery/shared';
 import { StoreApiError } from '@grocery/shared';
-import { httpGet } from '../utils/http-client';
+import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeNormalisedUnitPrice } from '../utils/unit-price';
 import { ColesSessionManager } from '../utils/coles-session';
 import type { StoreAdapter } from './store-adapter';
@@ -37,8 +37,11 @@ function normaliseUnitMeasure(unit: string): string {
 export class ColesAdapter implements StoreAdapter {
   readonly storeName = 'coles' as const;
   readonly displayName = 'Coles';
+  private client: StoreClient;
 
-  constructor(private readonly sessionManager: ColesSessionManager) {}
+  constructor(private readonly sessionManager: ColesSessionManager, client?: StoreClient) {
+    this.client = client ?? createStoreClient(this.storeName);
+  }
 
   async searchProduct(query: string): Promise<ProductMatch[]> {
     let buildId: string;
@@ -56,8 +59,7 @@ export class ColesAdapter implements StoreAdapter {
 
     const url = `https://www.coles.com.au/_next/data/${buildId}/search/products.json?keyword=${encodeURIComponent(query)}`;
 
-    const data = await httpGet<ColesSearchResponse>(url, {
-      store: 'coles',
+    const data = await this.client.get<ColesSearchResponse>(url, {
       headers: {
         Cookie: cookies,
       },

@@ -1,5 +1,5 @@
 import type { ProductMatch } from '@grocery/shared';
-import { httpGet } from '../utils/http-client';
+import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeNormalisedUnitPrice } from '../utils/unit-price';
 import type { StoreAdapter } from './store-adapter';
 
@@ -20,17 +20,22 @@ interface WoolworthsResponse {
 export class WoolworthsAdapter implements StoreAdapter {
   readonly storeName = 'woolworths' as const;
   readonly displayName = 'Woolworths';
+  private client: StoreClient;
+
+  constructor(client?: StoreClient) {
+    this.client = client ?? createStoreClient(this.storeName);
+  }
 
   async searchProduct(query: string): Promise<ProductMatch[]> {
     const url = `https://www.woolworths.com.au/apis/ui/Search/products?searchTerm=${encodeURIComponent(query)}&pageSize=12`;
-    const data = await httpGet<WoolworthsResponse>(url, { store: this.storeName });
+    const data = await this.client.get<WoolworthsResponse>(url);
     const products = (data.Products || []).flatMap(group => group.Products || []);
     return products.filter(p => p.IsAvailable).map(p => this.mapProduct(p));
   }
 
   async isAvailable(): Promise<boolean> {
     try {
-      await httpGet('https://www.woolworths.com.au/apis/ui/Search/products?searchTerm=test&pageSize=1', { store: this.storeName });
+      await this.client.get('https://www.woolworths.com.au/apis/ui/Search/products?searchTerm=test&pageSize=1');
       return true;
     } catch {
       return false;

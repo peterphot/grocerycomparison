@@ -8,7 +8,7 @@ vi.mock('../src/services/search-orchestrator.js', () => ({
       constructorSpy(adapters);
     }
     async search() {
-      return { storeTotals: [], mixAndMatch: { items: [], total: 0 }, searchResults: [] };
+      return { storeTotals: [], mixAndMatch: { items: [], total: 0 } };
     }
   },
 }));
