@@ -43,7 +43,7 @@ export class AldiAdapter implements StoreAdapter {
   }
 
   private mapProduct(p: AldiProduct): ProductMatch {
-    const price = p.price.amount / 100;
+    const price = +(p.price.amount / 100).toFixed(2);
     const parsed = p.sellingSize ? parsePackageSize(p.sellingSize) : null;
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;

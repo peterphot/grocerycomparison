@@ -138,6 +138,26 @@ describe('AldiAdapter', () => {
     expect(results).toEqual([]);
   });
 
+  it('isAvailable returns true when API responds', async () => {
+    server.use(
+      http.get('https://api.aldi.com.au/v3/product-search', () => {
+        return HttpResponse.json({ data: [] });
+      }),
+    );
+
+    expect(await adapter.isAvailable()).toBe(true);
+  });
+
+  it('isAvailable returns false when API is unreachable', async () => {
+    server.use(
+      http.get('https://api.aldi.com.au/v3/product-search', () => {
+        return HttpResponse.error();
+      }),
+    );
+
+    expect(await adapter.isAvailable()).toBe(false);
+  });
+
   it('throws StoreApiError on 500', async () => {
     server.use(
       http.get('https://api.aldi.com.au/v3/product-search', () => {
