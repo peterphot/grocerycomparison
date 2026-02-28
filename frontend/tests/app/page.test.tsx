@@ -56,7 +56,7 @@ describe('HomePage', () => {
     expect(screen.getByText('GroceryCompare')).toBeInTheDocument();
   });
 
-  it('shows loading spinner while search is in-flight', async () => {
+  it('shows loading skeleton while search is in-flight', async () => {
     const user = userEvent.setup();
 
     // Use a delayed response to keep the loading state visible
@@ -73,7 +73,8 @@ describe('HomePage', () => {
     await user.type(nameInput, 'milk');
     await user.click(screen.getByRole('button', { name: /compare prices/i }));
 
-    expect(screen.getByText('Comparing prices...')).toBeInTheDocument();
+    const columns = document.querySelectorAll('[data-testid="skeleton-column"]');
+    expect(columns).toHaveLength(5);
   });
 
   it('renders comparison results after successful search', async () => {
@@ -115,7 +116,7 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: /compare prices/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+      expect(screen.getByText(/couldn't reach any stores/i)).toBeInTheDocument();
     });
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
   });
@@ -143,7 +144,7 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: /compare prices/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+      expect(screen.getByText(/couldn't reach any stores/i)).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole('button', { name: /try again/i }));

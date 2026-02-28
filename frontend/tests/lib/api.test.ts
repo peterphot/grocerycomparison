@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../setup';
 import { searchGroceries } from '../../src/lib/api';
@@ -69,5 +69,34 @@ describe('searchGroceries', () => {
 
     await searchGroceries(items);
     expect(receivedContentType).toBe('application/json');
+  });
+
+  it('throws ApiError with status 408 on 15s timeout', async () => {
+    vi.useFakeTimers();
+    const originalFetch = globalThis.fetch;
+
+    try {
+      globalThis.fetch = vi.fn().mockImplementation(
+        (_url: string, options?: { signal?: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            if (options?.signal) {
+              options.signal.addEventListener('abort', () => {
+                reject(new DOMException('The operation was aborted.', 'AbortError'));
+              });
+            }
+          }),
+      );
+
+      const promise = searchGroceries(items).catch((e: unknown) => e);
+      await vi.advanceTimersByTimeAsync(15_000);
+
+      const error = await promise;
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).status).toBe(408);
+      expect((error as ApiError).message).toBe('timeout');
+    } finally {
+      globalThis.fetch = originalFetch;
+      vi.useRealTimers();
+    }
   });
 });
