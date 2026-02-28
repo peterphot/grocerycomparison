@@ -35,6 +35,7 @@ async function fetchWithRetry<T>(
     const res = await fetch(url, {
       headers: mergedHeaders,
       signal: controller.signal,
+      redirect: 'error',
     });
 
     if (!res.ok) {
@@ -55,17 +56,16 @@ async function fetchWithRetry<T>(
     }
   } catch (err) {
     if (err instanceof StoreApiError) throw err;
-    if (retries > 0) {
+    const isTimeout = err instanceof Error && err.name === 'AbortError';
+    if (!isTimeout && retries > 0) {
       await delay(RETRY_DELAY_MS);
       return fetchWithRetry<T>(url, options, retries - 1);
     }
     throw new StoreApiError(
-      err instanceof Error && err.name === 'AbortError'
-        ? 'Request timed out'
-        : 'Network error',
+      isTimeout ? 'Request timed out' : 'Network error',
       options.store,
       undefined,
-      true,
+      !isTimeout,
     );
   } finally {
     clearTimeout(timeout);
