@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { isShoppingListItem } from '@grocery/shared';
 import { SearchOrchestrator } from '../services/search-orchestrator.js';
+import { config } from '../config.js';
 
 export function createSearchRouter(orchestrator: SearchOrchestrator): Router {
   const router = Router();
@@ -14,8 +15,8 @@ export function createSearchRouter(orchestrator: SearchOrchestrator): Router {
         return;
       }
 
-      if (items.length > 50) {
-        res.status(400).json({ error: 'Too many items (max 50)' });
+      if (items.length > config.maxItems) {
+        res.status(400).json({ error: `Too many items (max ${config.maxItems})` });
         return;
       }
 
