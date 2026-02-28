@@ -10,12 +10,17 @@
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
-    "mock-server": "tsx e2e/fixtures/mock-server.ts",
+    "mock-server": "MOCK_PORT=4001 tsx e2e/fixtures/mock-server.ts",
     "build": "npm run build --workspaces --if-present"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/cors": "^2",
+    "@types/express": "^5",
     "concurrently": "^9.2.1",
-    "typescript": "^5",
-    "@playwright/test": "^1.58.2"
+    "cors": "^2",
+    "express": "^4",
+    "tsx": "^4",
+    "typescript": "^5"
   }
 }

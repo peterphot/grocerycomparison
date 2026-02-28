@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { fillItem, clickCompare, waitForResults } from './helpers/shopping';
+import { fillItem, clickCompare, waitForResults, storeColumn } from './helpers/shopping';
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
 test.describe('Desktop Comparison', () => {
-  test('Journey 7: shows empty state before search', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByText('Compare prices in seconds')).toBeVisible();
-    await expect(page.getByText('Add items to your list and click Compare Prices')).toBeVisible();
-  });
-
   test('Journey 1: type items and see results with 5 columns', async ({ page }) => {
     await page.goto('/');
 
@@ -42,9 +36,8 @@ test.describe('Desktop Comparison', () => {
 
     await fillItem(page, 0, 'milk');
 
-    // Check the brand checkbox
-    const brandCheckbox = page.getByRole('checkbox');
-    await brandCheckbox.first().check();
+    // Check the brand checkbox using its accessible label
+    await page.getByRole('checkbox', { name: /brand/i }).check();
 
     await clickCompare(page);
     await waitForResults(page);
@@ -53,7 +46,13 @@ test.describe('Desktop Comparison', () => {
     await expect(page.getByText('Woolworths Full Cream Milk 2L')).toBeVisible();
   });
 
-  test('Journey 8: Edit List returns to form and allows re-compare', async ({ page }) => {
+  test('Journey 7: shows empty state before search', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByText('Compare prices in seconds')).toBeVisible();
+    await expect(page.getByText('Add items to your list and click Compare Prices')).toBeVisible();
+  });
+
+  test('Journey 8: Edit List returns to form with items preserved', async ({ page }) => {
     await page.goto('/');
 
     await fillItem(page, 0, 'milk');
@@ -63,9 +62,11 @@ test.describe('Desktop Comparison', () => {
     // Click Edit List
     await page.getByRole('button', { name: 'Edit List' }).click();
 
-    // Should be back to form with empty state
+    // Should be back to form
     await expect(page.getByText('Compare prices in seconds')).toBeVisible();
-    await expect(page.getByPlaceholder('e.g. milk 2L').first()).toBeVisible();
+
+    // Verify the item name is still populated
+    await expect(page.getByPlaceholder('e.g. milk 2L').first()).toHaveValue('milk');
 
     // Re-compare
     await clickCompare(page);
@@ -82,7 +83,8 @@ test.describe('Desktop Comparison', () => {
     await clickCompare(page);
     await waitForResults(page);
 
-    // The mock returns Woolworths milk at $3.50 * 3 = $10.50
-    await expect(page.getByText('$10.50')).toBeVisible();
+    // Woolworths milk: $3.50 * 3 = $10.50 — scope to the Woolworths column
+    const woolworths = storeColumn(page, 'Woolworths');
+    await expect(woolworths.getByText('$10.50')).toBeVisible();
   });
 });

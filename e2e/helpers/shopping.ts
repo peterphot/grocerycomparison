@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 
 /**
  * Fill an item row in the shopping list form.
@@ -34,4 +34,12 @@ export async function clickCompare(page: Page): Promise<void> {
  */
 export async function waitForResults(page: Page): Promise<void> {
   await page.getByText('Best single store:').waitFor({ state: 'visible' });
+}
+
+/**
+ * Get a locator scoped to a specific store's result column.
+ * Finds the rounded card column that contains the given store header text.
+ */
+export function storeColumn(page: Page, storeName: string): Locator {
+  return page.locator('.rounded-xl').filter({ hasText: storeName });
 }

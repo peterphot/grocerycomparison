@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.use({ viewport: { width: 1440, height: 900 } });
+
 test.describe('Form Interactions', () => {
   test('Journey 4: add items, remove item, minimum 1 enforced', async ({ page }) => {
     await page.goto('/');

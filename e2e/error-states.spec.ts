@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { fillItem, clickCompare } from './helpers/shopping';
+import { fillItem, clickCompare, storeColumn } from './helpers/shopping';
+
+test.use({ viewport: { width: 1440, height: 900 } });
 
 test.describe('Error States', () => {
   test('Journey 5: backend 500 shows error banner with Try Again', async ({ page }) => {
@@ -55,7 +57,7 @@ test.describe('Error States', () => {
     await expect(page.getByText('Best single store:')).toBeVisible();
   });
 
-  test('Journey 6: unavailable item shows "Not available"', async ({ page }) => {
+  test('Journey 6: unavailable item shows "Not available" in Aldi column', async ({ page }) => {
     await page.goto('/');
 
     // The default mock response has bread unavailable at Aldi
@@ -66,7 +68,8 @@ test.describe('Error States', () => {
     await clickCompare(page);
     await expect(page.getByText('Best single store:')).toBeVisible();
 
-    // In the Aldi column, bread should show "Not available"
-    await expect(page.getByText('Not available')).toBeVisible();
+    // Scope assertion to the Aldi column
+    const aldi = storeColumn(page, 'Aldi');
+    await expect(aldi.getByText('Not available')).toBeVisible();
   });
 });

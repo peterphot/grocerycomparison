@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import { defaultResponse, buildQuantityResponse } from './comparison-response.js';
+import { defaultResponse, buildQuantityResponse } from './comparison-response';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(express.json({ limit: '100kb' }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
@@ -13,8 +13,13 @@ app.get('/api/health', (_req, res) => {
 app.post('/api/search', (req, res) => {
   const items = req.body?.items;
 
-  // If only one item is sent, return the quantity-aware response
-  if (Array.isArray(items) && items.length === 1) {
+  if (!Array.isArray(items) || items.length === 0) {
+    res.status(400).json({ error: 'items must be a non-empty array' });
+    return;
+  }
+
+  // Single item: return quantity-aware response
+  if (items.length === 1) {
     const quantity = items[0]?.quantity ?? 1;
     res.json(buildQuantityResponse(quantity));
     return;
@@ -24,7 +29,7 @@ app.post('/api/search', (req, res) => {
   res.json(defaultResponse);
 });
 
-const PORT = parseInt(process.env.MOCK_PORT ?? '4000', 10);
+const PORT = parseInt(process.env.MOCK_PORT ?? '4001', 10);
 
 app.listen(PORT, () => {
   console.log(`Mock server listening on port ${PORT}`);
