@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import type { ComparisonResponse } from '@grocery/shared';
-import type { ShoppingListItem } from '../hooks/useShoppingList';
+import { useRef, useState } from 'react';
+import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { ShoppingListForm } from '../components/shopping-list/ShoppingListForm';
 import { ComparisonResults } from '../components/results/ComparisonResults';
 import { Header } from '../components/common/Header';
@@ -19,8 +18,10 @@ type PageState =
 
 export default function Home(): React.ReactElement {
   const [pageState, setPageState] = useState<PageState>({ status: 'idle' });
+  const lastItemsRef = useRef<ShoppingListItem[]>([]);
 
   const handleSubmit = async (items: ShoppingListItem[]) => {
+    lastItemsRef.current = items;
     setPageState({ status: 'loading' });
     try {
       const data = await searchGroceries(items);
@@ -30,6 +31,10 @@ export default function Home(): React.ReactElement {
         error instanceof Error ? error.message : 'An unexpected error occurred';
       setPageState({ status: 'error', message });
     }
+  };
+
+  const handleRetry = () => {
+    handleSubmit(lastItemsRef.current);
   };
 
   const handleEditList = () => {
@@ -62,7 +67,7 @@ export default function Home(): React.ReactElement {
           {pageState.status === 'error' && (
             <ErrorBanner
               message={pageState.message}
-              onRetry={handleEditList}
+              onRetry={handleRetry}
             />
           )}
         </div>

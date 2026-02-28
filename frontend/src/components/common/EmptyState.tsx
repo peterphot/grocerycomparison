@@ -1,4 +1,4 @@
-export function EmptyState() {
+export function EmptyState(): React.ReactElement {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <h2 className="text-xl font-semibold text-zinc-700">Compare prices in seconds</h2>

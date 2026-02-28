@@ -30,8 +30,13 @@ describe('searchGroceries', () => {
       }),
     );
 
-    await expect(searchGroceries(items)).rejects.toThrow(ApiError);
-    await expect(searchGroceries(items)).rejects.toMatchObject({ status: 400 });
+    try {
+      await searchGroceries(items);
+      expect.fail('Expected ApiError to be thrown');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).status).toBe(400);
+    }
   });
 
   it('throws ApiError with status 500 on server error', async () => {
@@ -43,8 +48,13 @@ describe('searchGroceries', () => {
       }),
     );
 
-    await expect(searchGroceries(items)).rejects.toThrow(ApiError);
-    await expect(searchGroceries(items)).rejects.toMatchObject({ status: 500 });
+    try {
+      await searchGroceries(items);
+      expect.fail('Expected ApiError to be thrown');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).status).toBe(500);
+    }
   });
 
   it('includes Content-Type: application/json header', async () => {

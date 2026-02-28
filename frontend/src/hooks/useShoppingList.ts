@@ -1,13 +1,9 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import type { ShoppingListItem } from '@grocery/shared';
 
-export interface ShoppingListItem {
-  id: string;
-  name: string;
-  quantity: number;
-  isBrandSpecific: boolean;
-}
+export type { ShoppingListItem };
 
 function createBlankItem(): ShoppingListItem {
   return {

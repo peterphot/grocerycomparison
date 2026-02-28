@@ -120,6 +120,40 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
   });
 
+  it('clicking Try Again retries the search', async () => {
+    const user = userEvent.setup();
+    let callCount = 0;
+
+    server.use(
+      http.post('http://localhost:4000/api/search', () => {
+        callCount++;
+        if (callCount === 1) {
+          return new HttpResponse(JSON.stringify({ message: 'Server error' }), {
+            status: 500,
+          });
+        }
+        return HttpResponse.json(mockComparisonResponse);
+      }),
+    );
+
+    render(<Home />);
+
+    const nameInput = screen.getByPlaceholderText('e.g. milk 2L');
+    await user.type(nameInput, 'milk');
+    await user.click(screen.getByRole('button', { name: /compare prices/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: /try again/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Coles')).toBeInTheDocument();
+    });
+    expect(callCount).toBe(2);
+  });
+
   it('clicking Edit List returns to form view', async () => {
     const user = userEvent.setup();
 

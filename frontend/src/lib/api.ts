@@ -1,10 +1,12 @@
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { ApiError } from './errors';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
 export async function searchGroceries(
   items: ShoppingListItem[],
 ): Promise<ComparisonResponse> {
-  const response = await fetch('http://localhost:4000/api/search', {
+  const response = await fetch(`${API_BASE}/api/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items }),
