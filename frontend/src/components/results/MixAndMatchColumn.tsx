@@ -1,7 +1,7 @@
 import type { MixAndMatchResult } from '@grocery/shared';
 import { StoreHeader } from './StoreHeader';
 import { ItemRow } from './ItemRow';
-import { formatPrice } from '../../lib/utils';
+import { ResultColumn } from './ResultColumn';
 
 interface MixAndMatchColumnProps {
   mixAndMatch: MixAndMatchResult;
@@ -9,14 +9,13 @@ interface MixAndMatchColumnProps {
 
 export function MixAndMatchColumn({ mixAndMatch }: MixAndMatchColumnProps) {
   return (
-    <div className="border border-zinc-200 rounded-xl overflow-hidden">
-      <StoreHeader storeName="Mix & Match" store="mixandmatch" isCheapest={false} />
+    <ResultColumn
+      header={<StoreHeader storeName="Mix & Match" store="mixandmatch" isCheapest={false} />}
+      total={mixAndMatch.total}
+    >
       {mixAndMatch.items.map((item) => (
         <ItemRow key={item.shoppingListItemId} match={item.cheapestMatch} lineTotal={item.lineTotal} />
       ))}
-      <div className="px-3 py-2 bg-zinc-50 font-semibold text-right text-sm">
-        {formatPrice(mixAndMatch.total)}
-      </div>
-    </div>
+    </ResultColumn>
   );
 }

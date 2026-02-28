@@ -1,7 +1,12 @@
+const priceFormatter = new Intl.NumberFormat('en-AU', {
+  style: 'currency',
+  currency: 'AUD',
+});
+
 export function formatPrice(amount: number): string {
-  return `$${amount.toFixed(2)}`;
+  return priceFormatter.format(amount);
 }
 
 export function formatUnitPrice(unitPrice: number, unitMeasure: string): string {
-  return `$${unitPrice.toFixed(2)} / ${unitMeasure}`;
+  return `${priceFormatter.format(unitPrice)} / ${unitMeasure}`;
 }

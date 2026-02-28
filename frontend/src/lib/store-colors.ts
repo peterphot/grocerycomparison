@@ -1,6 +1,6 @@
 import type { StoreName } from '@grocery/shared';
 
-type StoreColorKey = StoreName | 'mixandmatch';
+export type StoreColorKey = StoreName | 'mixandmatch';
 
 export const STORE_COLORS: Record<StoreColorKey, string> = {
   woolworths: '#00A347',

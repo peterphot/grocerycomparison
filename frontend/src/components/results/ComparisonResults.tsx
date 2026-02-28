@@ -10,16 +10,23 @@ interface ComparisonResultsProps {
 export function ComparisonResults({ response }: ComparisonResultsProps) {
   if (response.storeTotals.length === 0) return null;
 
-  const cheapestStore = response.storeTotals.reduce((min, st) =>
+  const fullyAvailable = response.storeTotals.filter(st => st.allItemsAvailable);
+  const cheapestPool = fullyAvailable.length > 0 ? fullyAvailable : response.storeTotals;
+  const cheapestStore = cheapestPool.reduce((min, st) =>
     st.total < min.total ? st : min
-  , response.storeTotals[0]);
+  , cheapestPool[0]);
+
+  const columnCount = response.storeTotals.length + 1;
 
   return (
     <div>
       <div className="mb-4 p-3 bg-green-50 rounded-xl text-center text-sm font-medium text-green-800">
         Best single store: {cheapestStore.storeName} {formatPrice(cheapestStore.total)}
       </div>
-      <div className="grid grid-cols-5 gap-4">
+      <div
+        className="grid gap-4"
+        style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+      >
         {response.storeTotals.map((storeTotal) => (
           <StoreColumn
             key={storeTotal.store}
