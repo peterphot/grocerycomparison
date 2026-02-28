@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { ShoppingListForm } from '../components/shopping-list/ShoppingListForm';
 import { ComparisonResults } from '../components/results/ComparisonResults';
@@ -30,7 +30,7 @@ export default function Home(): React.ReactElement {
   const lastItemsRef = useRef<ShoppingListItem[]>([]);
   const abortRef = useRef<AbortController | null>(null);
 
-  const handleSubmit = async (items: ShoppingListItem[]) => {
+  const handleSubmit = useCallback(async (items: ShoppingListItem[]) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -44,16 +44,16 @@ export default function Home(): React.ReactElement {
       if (controller.signal.aborted) return;
       setPageState({ status: 'error', message: getErrorMessage(error) });
     }
-  };
+  }, []);
 
-  const handleRetry = () => {
-    handleSubmit(lastItemsRef.current);
-  };
+  const handleRetry = useCallback(() => {
+    void handleSubmit(lastItemsRef.current);
+  }, [handleSubmit]);
 
-  const handleEditList = () => {
+  const handleEditList = useCallback(() => {
     abortRef.current?.abort();
     setPageState({ status: 'idle' });
-  };
+  }, []);
 
   const isResults = pageState.status === 'results';
 

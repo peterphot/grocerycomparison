@@ -13,7 +13,8 @@ export function formatUnitPrice(unitPrice: number, unitMeasure: string): string 
   return `${priceFormatter.format(unitPrice)} / ${unitMeasure}`;
 }
 
-export function findCheapestStore(storeTotals: StoreTotal[]): StoreTotal {
+export function findCheapestStore(storeTotals: StoreTotal[]): StoreTotal | undefined {
+  if (storeTotals.length === 0) return undefined;
   const fullyAvailable = storeTotals.filter(st => st.allItemsAvailable);
   const pool = fullyAvailable.length > 0 ? fullyAvailable : storeTotals;
   return pool.reduce((min, st) => (st.total < min.total ? st : min), pool[0]);

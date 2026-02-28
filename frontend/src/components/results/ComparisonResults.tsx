@@ -2,13 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
-import type { ComparisonResponse, ShoppingListItem, StoreTotal } from '@grocery/shared';
+import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
 import { MixAndMatchColumn } from './MixAndMatchColumn';
 import { SummaryPanel } from './SummaryPanel';
 import { SavingsTip } from './SavingsTip';
-import { ItemRow } from './ItemRow';
-import { ResultColumn } from './ResultColumn';
 import { formatPrice, findCheapestStore } from '../../lib/utils';
 import { STORE_COLORS, type StoreColorKey } from '../../lib/store-colors';
 
@@ -21,8 +19,7 @@ interface ComparisonResultsProps {
 type TabKey = StoreColorKey;
 
 export function ComparisonResults({ response, items, onEditList }: ComparisonResultsProps) {
-  if (response.storeTotals.length === 0) return null;
-
+  // All hooks called unconditionally (Rules of Hooks)
   const cheapestStore = useMemo(
     () => findCheapestStore(response.storeTotals),
     [response.storeTotals],
@@ -34,29 +31,41 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
   );
 
   const mixMatchSavings = useMemo(() => {
-    if (allUnavailable) return 0;
+    if (allUnavailable || !cheapestStore) return 0;
     return cheapestStore.total - response.mixAndMatch.total;
   }, [cheapestStore, response.mixAndMatch.total, allUnavailable]);
 
   const columnCount = response.storeTotals.length + 1;
 
-  // Mobile tab state: stores + mix & match
   const [activeTab, setActiveTab] = useState<TabKey>(
     response.storeTotals[0]?.store ?? 'mixandmatch',
   );
 
-  const tabs: Array<{ key: TabKey; label: string }> = [
-    ...response.storeTotals.map((st) => ({ key: st.store as TabKey, label: st.storeName })),
-    { key: 'mixandmatch' as TabKey, label: 'Mix & Match' },
-  ];
+  const tabs = useMemo<Array<{ key: TabKey; label: string }>>(
+    () => [
+      ...response.storeTotals.map((st) => ({ key: st.store, label: st.storeName })),
+      { key: 'mixandmatch', label: 'Mix & Match' },
+    ],
+    [response.storeTotals],
+  );
 
-  const activeStore = response.storeTotals.find((st) => st.store === activeTab);
+  const activeStore = useMemo(
+    () => response.storeTotals.find((st) => st.store === activeTab),
+    [response.storeTotals, activeTab],
+  );
 
-  // Calculate savings for active store on mobile
   const activeStoreSavings = useMemo(() => {
     if (activeTab === 'mixandmatch' || !activeStore) return 0;
     return activeStore.total - response.mixAndMatch.total;
   }, [activeTab, activeStore, response.mixAndMatch.total]);
+
+  const gridStyle = useMemo(
+    () => ({ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }),
+    [columnCount],
+  );
+
+  // Early return after all hooks
+  if (response.storeTotals.length === 0 || !cheapestStore) return null;
 
   return (
     <div>
@@ -140,10 +149,7 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
         )}
 
         {/* Store columns grid */}
-        <div
-          className="flex-1 grid gap-4"
-          style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
-        >
+        <div className="flex-1 grid gap-4" style={gridStyle}>
           {response.storeTotals.map((storeTotal) => (
             <StoreColumn
               key={storeTotal.store}

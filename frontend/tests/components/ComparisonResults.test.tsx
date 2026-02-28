@@ -363,18 +363,22 @@ describe('findCheapestStore', () => {
   it('returns cheapest fully-available store', () => {
     const result = findCheapestStore(storeTotals);
     // Coles ($15.60) is cheapest among fully-available stores
-    expect(result.store).toBe('coles');
+    expect(result?.store).toBe('coles');
   });
 
   it('falls back to cheapest overall when none are fully available', () => {
     const allPartial = storeTotals.map(st => ({ ...st, allItemsAvailable: false }));
     const result = findCheapestStore(allPartial);
-    expect(result.store).toBe('aldi');
+    expect(result?.store).toBe('aldi');
   });
 
   it('returns sole store when only one exists', () => {
     const result = findCheapestStore([storeTotals[0]]);
-    expect(result.store).toBe('coles');
+    expect(result?.store).toBe('coles');
+  });
+
+  it('returns undefined for empty array', () => {
+    expect(findCheapestStore([])).toBeUndefined();
   });
 });
 
