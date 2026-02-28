@@ -31,7 +31,7 @@ from the product title via regex since the API does not provide a structured siz
 - [ ] Calls `GET https://www.harrisfarm.com.au/search/suggest.json?q={query}&resources[type]=product&resources[limit]=10`
 - [ ] Parses `resources.results.products` array
 - [ ] Converts `price` string to float (e.g., `"3.10"` → `3.10`)
-- [ ] Extracts package size from `title` using regex: `\d+(\.\d+)?\s*(g|kg|ml|L|lb|oz)` (case-insensitive)
+- [ ] Extracts package size from `title` using regex: `\d+(\.\d+)?\s*(g|kg|ml|L)` (case-insensitive, metric only)
 - [ ] Maps each result to `ProductMatch`:
   - `store: "harrisfarm"`
   - `productName` ← `title`
@@ -88,7 +88,7 @@ describe('HarrisFarmAdapter', () => {
 
 ### Title regex
 ```typescript
-const SIZE_REGEX = /(\d+(?:\.\d+)?)\s*(g|kg|ml|l|lb|oz)/i;
+const SIZE_REGEX = /(\d+(?:\.\d+)?)\s*(g|kg|ml|l)/i;
 ```
 Apply to the full title string. Take the last match if multiple (e.g., a title with a count AND a size).
 
