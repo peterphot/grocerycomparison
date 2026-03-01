@@ -29,9 +29,9 @@ export const ItemRow = memo(function ItemRow({ match, lineTotal, shoppingListIte
       href={match.productUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm font-medium text-zinc-900 truncate hover:text-green-700 hover:underline inline-flex items-center gap-1"
+      className="text-sm font-medium text-zinc-900 hover:text-green-700 hover:underline inline-flex items-center gap-1 min-w-0"
     >
-      {match.productName}
+      <span className="truncate">{match.productName}</span>
       <ExternalLink size={12} className="flex-shrink-0 text-zinc-400" />
     </a>
   ) : (

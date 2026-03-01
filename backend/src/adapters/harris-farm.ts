@@ -1,7 +1,8 @@
 import type { ProductMatch } from '@grocery/shared';
-import { createStoreClient, type StoreClient } from '../utils/store-client.js';
-import { parsePackageSize, computeDisplayUnitPrice, computeNormalisedUnitPrice } from '../utils/unit-price.js';
-import type { StoreAdapter } from './store-adapter.js';
+import { createStoreClient, type StoreClient } from '../utils/store-client';
+import { parsePackageSize, computeDisplayUnitPrice, computeNormalisedUnitPrice } from '../utils/unit-price';
+import { validateProductUrl } from '../utils/product-url';
+import type { StoreAdapter } from './store-adapter';
 
 interface ShopifyProduct {
   id: number;
@@ -9,7 +10,7 @@ interface ShopifyProduct {
   handle: string;
   available: boolean;
   price: string;
-  price_max: string;
+  price_max?: string;
   tags?: string[];
   vendor: string;
 }
@@ -45,15 +46,16 @@ export class HarrisFarmAdapter implements StoreAdapter {
   }
 
   private mapProduct(p: ShopifyProduct): ProductMatch {
-    const price = parseFloat(p.price_max || p.price);
+    const price = parseFloat(p.price_max ?? p.price);
     const sizeMatch = p.title.match(/(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i);
     const parsed = parsePackageSize(p.title);
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
 
-    const productUrl = p.handle
+    const rawUrl = p.handle
       ? `https://www.harrisfarm.com.au/products/${p.handle}`
       : null;
+    const productUrl = rawUrl ? validateProductUrl(rawUrl, this.storeName) : null;
 
     return {
       store: this.storeName,

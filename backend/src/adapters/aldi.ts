@@ -1,6 +1,7 @@
 import type { ProductMatch } from '@grocery/shared';
 import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeDisplayUnitPrice, computeNormalisedUnitPrice } from '../utils/unit-price';
+import { validateProductUrl } from '../utils/product-url';
 import type { StoreAdapter } from './store-adapter';
 
 interface AldiProduct {
@@ -52,7 +53,12 @@ export class AldiAdapter implements StoreAdapter {
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
 
-    const productUrl = `https://www.aldi.com.au/product/${p.urlSlugText}-${p.sku}`;
+    const productUrl = p.urlSlugText && p.sku
+      ? validateProductUrl(
+          `https://www.aldi.com.au/product/${p.urlSlugText}-${p.sku}`,
+          this.storeName,
+        )
+      : null;
 
     return {
       store: this.storeName,

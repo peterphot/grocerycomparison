@@ -105,6 +105,20 @@ describe('HarrisFarmAdapter', () => {
     );
   });
 
+  it('falls back to price when price_max is absent', async () => {
+    server.use(
+      http.get('https://www.harrisfarm.com.au/search/suggest.json', () => {
+        return HttpResponse.json(fixture);
+      }),
+    );
+
+    const results = await adapter.searchProduct('fruit');
+    const box = results.find((r) => r.productName.includes('Seasonal Fruit'));
+
+    // Seasonal Fruit Box fixture has no price_max, so should use price "35.00"
+    expect(box?.price).toBe(35.0);
+  });
+
   it('filters out unavailable products', async () => {
     server.use(
       http.get('https://www.harrisfarm.com.au/search/suggest.json', () => {
