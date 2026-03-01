@@ -4,6 +4,8 @@ import { parsePackageSize, computeNormalisedUnitPrice } from '../utils/unit-pric
 import type { StoreAdapter } from './store-adapter';
 
 interface WoolworthsProduct {
+  Stockcode: number;
+  UrlFriendlyName: string;
   DisplayName: string;
   Price: number;
   PackageSize: string;
@@ -51,7 +53,7 @@ export class WoolworthsAdapter implements StoreAdapter {
       ? computeNormalisedUnitPrice(p.Price, packageParsed.qty, packageParsed.unit)
       : null;
 
-    const productUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodeURIComponent(p.DisplayName)}`;
+    const productUrl = `https://www.woolworths.com.au/shop/productdetails/${p.Stockcode}/${p.UrlFriendlyName}`;
 
     return {
       store: this.storeName,

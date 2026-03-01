@@ -7,6 +7,7 @@ interface AldiProduct {
   sku: string;
   name: string;
   brandName: string;
+  urlSlugText: string;
   sellingSize: string | null;
   notForSale: boolean;
   price: { amount: number; amountRelevantDisplay: string; currencyCode: string };
@@ -51,7 +52,7 @@ export class AldiAdapter implements StoreAdapter {
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
 
-    const productUrl = `https://www.aldi.com.au/en/search/?text=${encodeURIComponent(p.name)}`;
+    const productUrl = `https://www.aldi.com.au/product/${p.urlSlugText}-${p.sku}`;
 
     return {
       store: this.storeName,

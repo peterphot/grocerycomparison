@@ -90,6 +90,8 @@ describe('WoolworthsAdapter', () => {
         {
           Products: [
             {
+              Stockcode: 100001,
+              UrlFriendlyName: 'vegemite',
               DisplayName: 'Vegemite 380g',
               Price: 7.70,
               PackageSize: '380g',
@@ -113,6 +115,8 @@ describe('WoolworthsAdapter', () => {
         {
           Products: [
             {
+              Stockcode: 100002,
+              UrlFriendlyName: 'woolworths-milk',
               DisplayName: 'Milk 3L',
               Price: 4.65,
               PackageSize: '3L',
@@ -122,6 +126,8 @@ describe('WoolworthsAdapter', () => {
               IsAvailable: true,
             },
             {
+              Stockcode: 100003,
+              UrlFriendlyName: 'sunrice-rice',
               DisplayName: 'Rice 1KG',
               Price: 3.00,
               PackageSize: '1kg',
@@ -139,14 +145,14 @@ describe('WoolworthsAdapter', () => {
     expect(results[1].unitMeasure).toBe('kg');
   });
 
-  it('populates productUrl with Woolworths search URL', async () => {
+  it('populates productUrl with direct Woolworths product page URL', async () => {
     mockSearchSuccess();
     const results = await adapter.searchProduct('milk');
     expect(results[0].productUrl).toBe(
-      'https://www.woolworths.com.au/shop/search/products?searchTerm=Woolworths%20Full%20Cream%20Milk%203L',
+      'https://www.woolworths.com.au/shop/productdetails/888137/woolworths-full-cream-milk',
     );
     expect(results[1].productUrl).toBe(
-      'https://www.woolworths.com.au/shop/search/products?searchTerm=Woolworths%20Lite%20Milk%202L',
+      'https://www.woolworths.com.au/shop/productdetails/888138/woolworths-lite-milk',
     );
   });
 
