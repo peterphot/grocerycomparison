@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CircleCheck } from 'lucide-react';
+import { AlertTriangle, CircleCheck } from 'lucide-react';
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
 import { MixAndMatchColumn } from './MixAndMatchColumn';
@@ -113,6 +113,22 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               Save {formatPrice(mixMatchSavings)} with mix &amp; match &rarr;
             </button>
           )}
+        </div>
+      )}
+
+      {/* B3: Store error messages */}
+      {response.storeErrors && Object.keys(response.storeErrors).length > 0 && (
+        <div className="mb-4 space-y-1.5">
+          {Object.entries(response.storeErrors).map(([store, message]) => (
+            <div
+              key={store}
+              className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800"
+            >
+              <AlertTriangle size={16} className="text-amber-500 flex-shrink-0" />
+              <span className="capitalize font-medium">{store}:</span>
+              <span>{message}</span>
+            </div>
+          ))}
         </div>
       )}
 

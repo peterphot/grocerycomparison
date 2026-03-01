@@ -422,6 +422,19 @@ describe('ResultColumn', () => {
   });
 });
 
+describe('ComparisonResults store errors', () => {
+  it('shows error message for stores with errors (B3)', () => {
+    const responseWithErrors = {
+      ...mockComparisonResponse,
+      storeErrors: { coles: 'Connection timeout', aldi: 'API error' },
+    };
+    render(<ComparisonResults response={responseWithErrors} />);
+    // Error messages should appear somewhere in the rendered output
+    expect(screen.getAllByText(/Connection timeout/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/API error/).length).toBeGreaterThanOrEqual(1);
+  });
+});
+
 describe('findCheapestStore', () => {
   const storeTotals = mockComparisonResponse.storeTotals;
 

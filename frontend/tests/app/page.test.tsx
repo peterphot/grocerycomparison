@@ -32,9 +32,9 @@ describe('Header', () => {
     expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 
-  it('renders Help link (M5)', () => {
+  it('does not render Help link (UX1 - removed)', () => {
     render(<Home />);
-    expect(screen.getByText('Help')).toBeInTheDocument();
+    expect(screen.queryByText('Help')).not.toBeInTheDocument();
   });
 });
 

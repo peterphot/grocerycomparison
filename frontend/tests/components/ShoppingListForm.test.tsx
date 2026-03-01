@@ -128,4 +128,26 @@ describe('ShoppingListForm', () => {
     render(<ShoppingListForm onSubmit={vi.fn()} />);
     expect(screen.getByText(/toggle brand preference/i)).toBeInTheDocument();
   });
+
+  it('form fields have id and name attributes (A1)', async () => {
+    const user = userEvent.setup();
+    render(<ShoppingListForm onSubmit={vi.fn()} />);
+    // Add a second item to get multiple rows
+    await user.click(screen.getByRole('button', { name: /add another item/i }));
+
+    const nameInputs = screen.getAllByPlaceholderText('e.g. milk 2L');
+    const qtyInputs = screen.getAllByRole('spinbutton');
+
+    // All name inputs should have id and name
+    for (const input of nameInputs) {
+      expect(input).toHaveAttribute('id');
+      expect(input).toHaveAttribute('name');
+    }
+
+    // All quantity inputs should have id and name
+    for (const input of qtyInputs) {
+      expect(input).toHaveAttribute('id');
+      expect(input).toHaveAttribute('name');
+    }
+  });
 });

@@ -40,6 +40,8 @@ export const ShoppingListItem = memo(function ShoppingListItem({ item, onChange,
       <div className="flex items-center gap-3">
         <input
           type="text"
+          id={`item-name-${item.id}`}
+          name={`item-name-${item.id}`}
           value={item.name}
           onChange={handleNameChange}
           placeholder="e.g. milk 2L"
@@ -47,6 +49,8 @@ export const ShoppingListItem = memo(function ShoppingListItem({ item, onChange,
         />
         <input
           type="number"
+          id={`item-qty-${item.id}`}
+          name={`item-qty-${item.id}`}
           value={item.quantity}
           onChange={handleQtyChange}
           min={1}
