@@ -2,8 +2,8 @@
   "name": "@grocery/shared",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/types/index.ts",
-  "types": "./src/types/index.ts",
+  "main": "./dist/types/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "vitest run --passWithNoTests"

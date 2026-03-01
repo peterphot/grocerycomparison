@@ -7,7 +7,7 @@
     "frontend"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev": "npm run build -w packages/shared && concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
     "mock-server": "tsx e2e/fixtures/mock-server.ts",
