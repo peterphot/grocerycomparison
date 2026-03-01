@@ -37,6 +37,7 @@ function validProductMatch(): ProductMatch {
     unitMeasure: 'per litre',
     unitPriceNormalised: 0.175,
     available: true,
+    productUrl: 'https://www.woolworths.com.au/shop/search/products?searchTerm=Woolworths%20Full%20Cream%20Milk',
   };
 }
 
@@ -273,6 +274,27 @@ describe('isProductMatch', () => {
 
   it('returns false for an empty object', () => {
     expect(isProductMatch({})).toBe(false);
+  });
+
+  it('returns true when productUrl is null', () => {
+    const match = { ...validProductMatch(), productUrl: null };
+    expect(isProductMatch(match)).toBe(true);
+  });
+
+  it('returns true when productUrl is a string', () => {
+    const match = { ...validProductMatch(), productUrl: 'https://example.com/product' };
+    expect(isProductMatch(match)).toBe(true);
+  });
+
+  it('returns false when productUrl has wrong type', () => {
+    const match = { ...validProductMatch(), productUrl: 123 };
+    expect(isProductMatch(match)).toBe(false);
+  });
+
+  it('returns false when productUrl is undefined (missing)', () => {
+    const match = { ...validProductMatch() } as Record<string, unknown>;
+    delete match.productUrl;
+    expect(isProductMatch(match)).toBe(false);
   });
 });
 

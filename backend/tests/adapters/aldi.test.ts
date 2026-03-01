@@ -77,6 +77,7 @@ describe('AldiAdapter', () => {
           sku: '000000000000999999',
           name: 'Mystery Item',
           brandName: 'TEST',
+          urlSlugText: 'test-mystery-item',
           sellingSize: null,
           notForSale: false,
           price: { amount: 500, amountRelevantDisplay: '$5.00', currencyCode: 'AUD' },
@@ -126,6 +127,23 @@ describe('AldiAdapter', () => {
 
     expect(capturedHeaders?.get('Origin')).toBe('https://www.aldi.com.au');
     expect(capturedHeaders?.get('Referer')).toBe('https://www.aldi.com.au/');
+  });
+
+  it('populates productUrl with direct Aldi product page URL', async () => {
+    server.use(
+      http.get('https://api.aldi.com.au/v3/product-search', () => {
+        return HttpResponse.json(aldiMilkFixture);
+      }),
+    );
+
+    const results = await adapter.searchProduct('milk');
+
+    expect(results[0].productUrl).toBe(
+      'https://www.aldi.com.au/product/farmdale-full-cream-milk-2l-000000000000567890',
+    );
+    expect(results[1].productUrl).toBe(
+      'https://www.aldi.com.au/product/farmdale-thickened-cream-300ml-000000000000567891',
+    );
   });
 
   it('returns empty array when no products found', async () => {

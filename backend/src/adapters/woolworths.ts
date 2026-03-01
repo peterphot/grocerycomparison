@@ -1,9 +1,12 @@
 import type { ProductMatch } from '@grocery/shared';
 import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeNormalisedUnitPrice } from '../utils/unit-price';
+import { validateProductUrl } from '../utils/product-url';
 import type { StoreAdapter } from './store-adapter';
 
 interface WoolworthsProduct {
+  Stockcode: number;
+  UrlFriendlyName: string;
   DisplayName: string;
   Price: number;
   PackageSize: string;
@@ -51,6 +54,13 @@ export class WoolworthsAdapter implements StoreAdapter {
       ? computeNormalisedUnitPrice(p.Price, packageParsed.qty, packageParsed.unit)
       : null;
 
+    const productUrl = p.Stockcode && p.UrlFriendlyName
+      ? validateProductUrl(
+          `https://www.woolworths.com.au/shop/productdetails/${p.Stockcode}/${p.UrlFriendlyName}`,
+          this.storeName,
+        )
+      : null;
+
     return {
       store: this.storeName,
       productName: p.DisplayName,
@@ -61,6 +71,7 @@ export class WoolworthsAdapter implements StoreAdapter {
       unitMeasure,
       unitPriceNormalised,
       available: true,
+      productUrl,
     };
   }
 

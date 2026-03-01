@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { ExternalLink } from 'lucide-react';
 import type { ProductMatch } from '@grocery/shared';
 import { STORE_COLORS, STORE_DISPLAY_NAMES, type StoreColorKey } from '../../lib/store-colors';
 import { formatPrice, formatUnitPrice } from '../../lib/utils';
@@ -23,6 +24,20 @@ export const ItemRow = memo(function ItemRow({ match, lineTotal, shoppingListIte
     );
   }
 
+  const productNameElement = match.productUrl ? (
+    <a
+      href={match.productUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-sm font-medium text-zinc-900 hover:text-green-700 hover:underline inline-flex items-center gap-1 min-w-0"
+    >
+      <span className="truncate">{match.productName}</span>
+      <ExternalLink size={12} className="flex-shrink-0 text-zinc-400" />
+    </a>
+  ) : (
+    <p className="text-sm font-medium text-zinc-900 truncate">{match.productName}</p>
+  );
+
   return (
     <div className="py-2 px-3 border-b border-zinc-100">
       {shoppingListItemName && (
@@ -31,7 +46,7 @@ export const ItemRow = memo(function ItemRow({ match, lineTotal, shoppingListIte
       <div className="flex justify-between items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="text-sm font-medium text-zinc-900 truncate">{match.productName}</p>
+            {productNameElement}
             {showStoreSource && (
               <span
                 className="flex-shrink-0 text-[10px] font-medium text-white rounded px-1 py-0.5 leading-tight"

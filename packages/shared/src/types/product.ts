@@ -19,6 +19,7 @@ export interface ProductMatch {
   unitMeasure: string | null;
   unitPriceNormalised: number | null;
   available: boolean;
+  productUrl: string | null;
 }
 
 export interface ItemSearchResult {

@@ -3,6 +3,7 @@ import { StoreApiError } from '@grocery/shared';
 import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeNormalisedUnitPrice } from '../utils/unit-price';
 import { ColesSessionManager } from '../utils/coles-session';
+import { validateProductUrl } from '../utils/product-url';
 import type { StoreAdapter } from './store-adapter';
 
 interface ColesProduct {
@@ -32,6 +33,14 @@ interface ColesSearchResponse {
 function normaliseUnitMeasure(unit: string): string {
   if (unit === 'l') return 'L';
   return unit;
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 export class ColesAdapter implements StoreAdapter {
@@ -79,6 +88,11 @@ export class ColesAdapter implements StoreAdapter {
           ? computeNormalisedUnitPrice(pricing.now, pkg.qty, pkg.unit)
           : null;
 
+        const productUrl = validateProductUrl(
+          `https://www.coles.com.au/product/${slugify(item.name)}-${item.id}`,
+          this.storeName,
+        );
+
         return {
           store: this.storeName,
           productName: item.name,
@@ -89,6 +103,7 @@ export class ColesAdapter implements StoreAdapter {
           unitMeasure,
           unitPriceNormalised,
           available: true,
+          productUrl,
         };
       });
   }

@@ -1,12 +1,14 @@
 import type { ProductMatch } from '@grocery/shared';
 import { createStoreClient, type StoreClient } from '../utils/store-client';
 import { parsePackageSize, computeDisplayUnitPrice, computeNormalisedUnitPrice } from '../utils/unit-price';
+import { validateProductUrl } from '../utils/product-url';
 import type { StoreAdapter } from './store-adapter';
 
 interface AldiProduct {
   sku: string;
   name: string;
   brandName: string;
+  urlSlugText: string;
   sellingSize: string | null;
   notForSale: boolean;
   price: { amount: number; amountRelevantDisplay: string; currencyCode: string };
@@ -51,6 +53,13 @@ export class AldiAdapter implements StoreAdapter {
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
 
+    const productUrl = p.urlSlugText && p.sku
+      ? validateProductUrl(
+          `https://www.aldi.com.au/product/${p.urlSlugText}-${p.sku}`,
+          this.storeName,
+        )
+      : null;
+
     return {
       store: this.storeName,
       productName: p.name,
@@ -61,6 +70,7 @@ export class AldiAdapter implements StoreAdapter {
       unitMeasure: display?.unitMeasure ?? null,
       unitPriceNormalised: normalised,
       available: true,
+      productUrl,
     };
   }
 }

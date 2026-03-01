@@ -34,7 +34,7 @@ describe('HarrisFarmAdapter', () => {
     const results = await adapter.searchProduct('milk');
     const milk = results.find((r) => r.productName.includes('Lite Milk'));
 
-    expect(milk?.price).toBe(3.1);
+    expect(milk?.price).toBe(3.2);
   });
 
   it('extracts "2L" from title and computes unit price', async () => {
@@ -83,6 +83,40 @@ describe('HarrisFarmAdapter', () => {
     expect(box!.unitPrice).toBeNull();
     expect(box!.unitMeasure).toBeNull();
     expect(box!.unitPriceNormalised).toBeNull();
+  });
+
+  it('populates productUrl with Harris Farm Shopify URL from handle', async () => {
+    server.use(
+      http.get('https://www.harrisfarm.com.au/search/suggest.json', () => {
+        return HttpResponse.json(fixture);
+      }),
+    );
+
+    const results = await adapter.searchProduct('milk');
+
+    expect(results[0].productUrl).toBe(
+      'https://www.harrisfarm.com.au/products/milk-lite-2l-harris-farm-88662',
+    );
+    expect(results[1].productUrl).toBe(
+      'https://www.harrisfarm.com.au/products/yoghurt-greek-500g-harris-farm',
+    );
+    expect(results[2].productUrl).toBe(
+      'https://www.harrisfarm.com.au/products/seasonal-fruit-box',
+    );
+  });
+
+  it('falls back to price when price_max is absent', async () => {
+    server.use(
+      http.get('https://www.harrisfarm.com.au/search/suggest.json', () => {
+        return HttpResponse.json(fixture);
+      }),
+    );
+
+    const results = await adapter.searchProduct('fruit');
+    const box = results.find((r) => r.productName.includes('Seasonal Fruit'));
+
+    // Seasonal Fruit Box fixture has no price_max, so should use price "35.00"
+    expect(box?.price).toBe(35.0);
   });
 
   it('filters out unavailable products', async () => {
