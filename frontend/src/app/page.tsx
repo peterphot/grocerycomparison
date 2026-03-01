@@ -63,34 +63,36 @@ export default function Home(): React.ReactElement {
         showEdit={isResults}
         onEditList={handleEditList}
       />
-      <div className="flex flex-col md:flex-row flex-1">
-        <div className="w-full md:w-[420px] p-4">
-          {/* On mobile with results: form is hidden (use Edit button in header) */}
-          <div className={isResults ? 'hidden md:block' : ''}>
+      {pageState.status === 'results' ? (
+        /* Results: full-width layout with summary panel inside ComparisonResults */
+        <div className="flex-1 p-4">
+          <ComparisonResults
+            response={pageState.data}
+            items={lastItemsRef.current}
+            onEditList={handleEditList}
+          />
+        </div>
+      ) : (
+        /* Idle / Loading / Error: form on left, content on right */
+        <div className="flex flex-col md:flex-row flex-1">
+          <div className="w-full md:w-[420px] p-4">
             <ShoppingListForm
               onSubmit={handleSubmit}
               initialItems={lastItemsRef.current.length > 0 ? lastItemsRef.current : undefined}
             />
           </div>
+          <div className="flex-1 p-4">
+            {pageState.status === 'idle' && <EmptyState />}
+            {pageState.status === 'loading' && <ComparisonSkeleton />}
+            {pageState.status === 'error' && (
+              <ErrorBanner
+                message={pageState.message}
+                onRetry={handleRetry}
+              />
+            )}
+          </div>
         </div>
-        <div className="flex-1 p-4">
-          {pageState.status === 'idle' && <EmptyState />}
-          {pageState.status === 'loading' && <ComparisonSkeleton />}
-          {pageState.status === 'results' && (
-            <ComparisonResults
-              response={pageState.data}
-              items={lastItemsRef.current}
-              onEditList={handleEditList}
-            />
-          )}
-          {pageState.status === 'error' && (
-            <ErrorBanner
-              message={pageState.message}
-              onRetry={handleRetry}
-            />
-          )}
-        </div>
-      </div>
+      )}
     </main>
   );
 }

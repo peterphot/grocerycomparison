@@ -171,7 +171,7 @@ describe('HomePage', () => {
     expect(callCount).toBe(2);
   });
 
-  it('keeps form visible alongside results after search', async () => {
+  it('hides form and shows results after search', async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -190,9 +190,9 @@ describe('HomePage', () => {
       expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Form should still be visible alongside results
-    expect(screen.getByPlaceholderText('e.g. milk 2L')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /compare prices/i })).toBeInTheDocument();
+    // Form should be hidden when results are displayed
+    expect(screen.queryByPlaceholderText('e.g. milk 2L')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /compare prices/i })).not.toBeInTheDocument();
   });
 
   it('clicking Edit list returns to form view', async () => {
@@ -214,8 +214,8 @@ describe('HomePage', () => {
       expect(screen.getAllByText('Coles').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Edit list button in the SummaryPanel (desktop) or Header (mobile)
-    const editButtons = screen.getAllByRole('button', { name: /edit list/i });
+    // Edit button in the Header or SummaryPanel
+    const editButtons = screen.getAllByRole('button', { name: /edit/i });
     await user.click(editButtons[0]);
 
     expect(
