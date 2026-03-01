@@ -1,6 +1,3 @@
 {
-  "version": 2,
-  "regions": ["syd1"],
-  "installCommand": "cd .. && npm install",
-  "buildCommand": "cd .. && npm run build -w packages/shared"
+  "regions": ["syd1"]
 }
