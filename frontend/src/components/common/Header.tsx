@@ -13,24 +13,16 @@ export function Header({ showEdit, onEditList }: HeaderProps): React.ReactElemen
         </div>
         <p className="text-zinc-500 text-sm">Compare prices across Australian supermarkets</p>
       </div>
-      <div className="flex items-center gap-3">
-        {showEdit && onEditList && (
-          <button
-            type="button"
-            onClick={onEditList}
-            className="md:hidden bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1.5"
-            aria-label="Edit list"
-          >
-            Edit
-          </button>
-        )}
-        <a
-          href="#help"
-          className="text-sm text-zinc-500 hover:text-zinc-700 transition-colors"
+      {showEdit && onEditList && (
+        <button
+          type="button"
+          onClick={onEditList}
+          className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1.5"
+          aria-label="Edit list"
         >
-          Help
-        </a>
-      </div>
+          Edit
+        </button>
+      )}
     </header>
   );
 }

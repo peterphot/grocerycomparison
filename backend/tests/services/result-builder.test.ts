@@ -33,7 +33,7 @@ describe('buildStoreTotals', () => {
     expect(coles.total).toBe(6.00);
   });
 
-  it('sorts stores ascending by total (cheapest first)', () => {
+  it('returns stores in fixed order: woolworths, coles, aldi, harrisfarm', () => {
     const results = [
       makeSearchResult({
         matches: [
@@ -46,10 +46,10 @@ describe('buildStoreTotals', () => {
     ];
 
     const totals = buildStoreTotals(results);
-    expect(totals[0].store).toBe('coles');
-    expect(totals[1].store).toBe('aldi');
-    expect(totals[2].store).toBe('harrisfarm');
-    expect(totals[3].store).toBe('woolworths');
+    expect(totals[0].store).toBe('woolworths');
+    expect(totals[1].store).toBe('coles');
+    expect(totals[2].store).toBe('aldi');
+    expect(totals[3].store).toBe('harrisfarm');
   });
 
   it('counts unavailable items per store', () => {
@@ -155,7 +155,7 @@ describe('buildStoreTotals', () => {
     expect(woolworths.total).toBe(2.00);
   });
 
-  it('stores with all items unavailable (total 0) sort last', () => {
+  it('maintains fixed order even when some stores have no results', () => {
     const results = [
       makeSearchResult({
         matches: [
@@ -167,11 +167,13 @@ describe('buildStoreTotals', () => {
     ];
 
     const totals = buildStoreTotals(results);
-    // aldi cheapest, coles second, then the two with 0
-    expect(totals[0].store).toBe('aldi');
+    // Fixed order is always woolworths, coles, aldi, harrisfarm
+    expect(totals[0].store).toBe('woolworths');
     expect(totals[1].store).toBe('coles');
-    // The last two should be the unavailable stores
-    expect(totals[2].total).toBe(0);
+    expect(totals[2].store).toBe('aldi');
+    expect(totals[3].store).toBe('harrisfarm');
+    // woolworths and harrisfarm have no matches
+    expect(totals[0].total).toBe(0);
     expect(totals[3].total).toBe(0);
   });
 });
@@ -194,7 +196,7 @@ describe('buildMixAndMatch', () => {
     expect(mix.total).toBe(3.00);
   });
 
-  it('uses unitPriceNormalised for comparison when available', () => {
+  it('always uses absolute price for comparison (ignores unitPriceNormalised)', () => {
     const results = [
       makeSearchResult({
         matches: [
@@ -205,23 +207,8 @@ describe('buildMixAndMatch', () => {
     ];
 
     const mix = buildMixAndMatch(results);
-    // woolworths has lower unitPriceNormalised, so it should be chosen
-    expect(mix.items[0].cheapestMatch!.store).toBe('woolworths');
-    // But lineTotal uses the actual price
-    expect(mix.items[0].lineTotal).toBe(6.00);
-  });
-
-  it('falls back to price when unitPriceNormalised is null', () => {
-    const results = [
-      makeSearchResult({
-        matches: [
-          makeMatch({ store: 'woolworths', price: 6.00, unitPriceNormalised: null }),
-          makeMatch({ store: 'coles', price: 3.00, unitPriceNormalised: null }),
-        ],
-      }),
-    ];
-
-    const mix = buildMixAndMatch(results);
+    // Coles has lower absolute price ($3 vs $6), so it should be chosen
+    // even though woolworths has better unit price
     expect(mix.items[0].cheapestMatch!.store).toBe('coles');
     expect(mix.items[0].lineTotal).toBe(3.00);
   });
@@ -302,7 +289,7 @@ describe('buildComparisonResponse', () => {
     expect(response.mixAndMatch).toHaveProperty('total');
   });
 
-  it('storeTotals are sorted cheapest first', () => {
+  it('storeTotals are in fixed order regardless of price', () => {
     const results = [
       makeSearchResult({
         matches: [
@@ -314,7 +301,9 @@ describe('buildComparisonResponse', () => {
     ];
 
     const response = buildComparisonResponse(results);
-    expect(response.storeTotals[0].store).toBe('coles');
-    expect(response.storeTotals[0].total).toBeLessThanOrEqual(response.storeTotals[1].total);
+    expect(response.storeTotals[0].store).toBe('woolworths');
+    expect(response.storeTotals[1].store).toBe('coles');
+    expect(response.storeTotals[2].store).toBe('aldi');
+    expect(response.storeTotals[3].store).toBe('harrisfarm');
   });
 });

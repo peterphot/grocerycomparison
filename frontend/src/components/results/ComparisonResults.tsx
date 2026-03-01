@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { CircleCheck } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, CircleCheck } from 'lucide-react';
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
 import { MixAndMatchColumn } from './MixAndMatchColumn';
 import { SummaryPanel } from './SummaryPanel';
 import { SavingsTip } from './SavingsTip';
 import { formatPrice, findCheapestStore } from '../../lib/utils';
-import { STORE_COLORS, type StoreColorKey } from '../../lib/store-colors';
+import { STORE_COLORS, STORE_DISPLAY_NAMES, type StoreColorKey } from '../../lib/store-colors';
 
 interface ComparisonResultsProps {
   response: ComparisonResponse;
@@ -19,6 +19,8 @@ interface ComparisonResultsProps {
 type TabKey = StoreColorKey;
 
 export function ComparisonResults({ response, items, onEditList }: ComparisonResultsProps) {
+  const mixMatchRef = useRef<HTMLDivElement>(null);
+
   // All hooks called unconditionally (Rules of Hooks)
   const cheapestStore = useMemo(
     () => findCheapestStore(response.storeTotals),
@@ -37,19 +39,20 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
 
   const columnCount = response.storeTotals.length + 1;
 
-  const [activeTab, setActiveTab] = useState<TabKey>(
-    response.storeTotals[0]?.store ?? 'mixandmatch',
+  // F7: Default mobile tab to cheapest store
+  const defaultTab = useMemo<TabKey>(
+    () => cheapestStore?.store ?? response.storeTotals[0]?.store ?? 'mixandmatch',
+    [cheapestStore, response.storeTotals],
   );
 
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultTab);
+
   useEffect(() => {
-    setActiveTab(response.storeTotals[0]?.store ?? 'mixandmatch');
-  }, [response.storeTotals]);
+    setActiveTab(cheapestStore?.store ?? response.storeTotals[0]?.store ?? 'mixandmatch');
+  }, [cheapestStore, response.storeTotals]);
 
   const tabs = useMemo<Array<{ key: TabKey; label: string }>>(
-    () => [
-      ...response.storeTotals.map((st) => ({ key: st.store, label: st.storeName })),
-      { key: 'mixandmatch', label: 'Mix & Match' },
-    ],
+    () => response.storeTotals.map((st) => ({ key: st.store, label: st.storeName })),
     [response.storeTotals],
   );
 
@@ -67,6 +70,14 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
     () => ({ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }),
     [columnCount],
   );
+
+  // F4: Handler for Save with Mix & Match CTA
+  const handleSavingsClick = () => {
+    // Mobile: switch to Mix & Match tab
+    setActiveTab('mixandmatch');
+    // Desktop: scroll to Mix & Match column
+    mixMatchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
 
   // Early return after all hooks
   if (response.storeTotals.length === 0 || !cheapestStore) return null;
@@ -91,10 +102,30 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
             Best mix &amp; match: {formatPrice(response.mixAndMatch.total)}
           </span>
           {mixMatchSavings > 0 && (
-            <span className="bg-green-100 text-green-700 text-xs font-medium rounded-full px-2.5 py-0.5 ml-auto">
-              Save {formatPrice(mixMatchSavings)} with mix &amp; match
-            </span>
+            <button
+              type="button"
+              onClick={handleSavingsClick}
+              className="bg-green-100 text-green-700 text-xs font-medium rounded-full px-2.5 py-0.5 ml-auto hover:bg-green-200 transition-colors cursor-pointer"
+            >
+              Save {formatPrice(mixMatchSavings)} with mix &amp; match &rarr;
+            </button>
           )}
+        </div>
+      )}
+
+      {/* B3: Store error messages */}
+      {response.storeErrors && Object.keys(response.storeErrors).length > 0 && (
+        <div className="mb-4 space-y-1.5">
+          {Object.entries(response.storeErrors).map(([store, message]) => (
+            <div
+              key={store}
+              className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800"
+            >
+              <AlertTriangle size={16} className="text-amber-500 flex-shrink-0" />
+              <span className="font-medium">{STORE_DISPLAY_NAMES[store as keyof typeof STORE_DISPLAY_NAMES] ?? store}:</span>
+              <span>{message}</span>
+            </div>
+          ))}
         </div>
       )}
 
@@ -127,6 +158,22 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               </button>
             );
           })}
+          {/* F5: Mix & Match pill (replaces standard Mix & Match tab) */}
+          {!allUnavailable && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'mixandmatch'}
+              onClick={() => setActiveTab('mixandmatch')}
+              className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-medium transition-colors ${
+                activeTab === 'mixandmatch'
+                  ? 'bg-violet-100 text-violet-600'
+                  : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
+            >
+              Mix {formatPrice(response.mixAndMatch.total)}
+            </button>
+          )}
         </div>
         <div data-testid="mobile-store-panel">
           {activeTab === 'mixandmatch' ? (
@@ -161,7 +208,9 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               isCheapest={storeTotal.store === cheapestStore.store}
             />
           ))}
-          <MixAndMatchColumn mixAndMatch={response.mixAndMatch} />
+          <div ref={mixMatchRef}>
+            <MixAndMatchColumn mixAndMatch={response.mixAndMatch} />
+          </div>
         </div>
       </div>
     </div>

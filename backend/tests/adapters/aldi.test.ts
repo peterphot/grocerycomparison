@@ -19,7 +19,7 @@ describe('AldiAdapter', () => {
 
     const results = await adapter.searchProduct('milk');
 
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(4);
     expect(results[0].store).toBe('aldi');
     expect(results[0].productName).toBe('Farmdale Full Cream Milk 2L');
     expect(results[0].brand).toBe('FARMDALE');
@@ -39,7 +39,7 @@ describe('AldiAdapter', () => {
     expect(results[1].price).toBe(2.15);
   });
 
-  it('filters out products where notForSale is true', async () => {
+  it('includes products regardless of notForSale flag (price comparison only)', async () => {
     server.use(
       http.get('https://api.aldi.com.au/v3/product-search', () => {
         return HttpResponse.json(aldiMilkFixture);
@@ -49,7 +49,9 @@ describe('AldiAdapter', () => {
     const results = await adapter.searchProduct('milk');
     const names = results.map(r => r.productName);
 
-    expect(names).not.toContain('Milk Frother');
+    // notForSale items are included because Aldi marks most products as
+    // not-for-sale (no online ordering) but prices are still valid for comparison
+    expect(names).toContain('Milk Frother');
   });
 
   it('computes unitPrice and unitMeasure from sellingSize', async () => {

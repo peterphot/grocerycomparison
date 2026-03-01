@@ -1,7 +1,17 @@
 import type { ShoppingListItem, ComparisonResponse, ItemSearchResult, ProductMatch } from '@grocery/shared';
+import { StoreApiError } from '@grocery/shared';
 import type { StoreAdapter } from '../adapters/store-adapter.js';
 import { buildComparisonResponse } from './result-builder.js';
 import { config } from '../config.js';
+
+/** Map internal errors to safe user-facing messages. */
+function sanitizeStoreError(error: unknown): string {
+  if (error instanceof StoreApiError) {
+    if (error.statusCode && error.statusCode >= 500) return 'Store service temporarily unavailable';
+    if (error.message === 'Request timed out') return 'Store did not respond in time';
+  }
+  return 'Unable to fetch results from this store';
+}
 
 const MAX_CACHE_ENTRIES = 1000;
 
@@ -57,16 +67,39 @@ export class SearchOrchestrator {
     }
 
     // Fan out: for each adapter, search items with per-adapter concurrency limit
+    const storeErrors: Record<string, string> = {};
+
     const adapterResults = await Promise.allSettled(
       this.adapters.map(async (adapter) => {
         const limit = pLimit(config.maxConcurrentPerStore);
         const settled = await Promise.allSettled(
           items.map((item) => limit(() => adapter.searchProduct(item.name)))
         );
+
+        // Check for per-item failures within this adapter
+        const failures = settled.filter((r) => r.status === 'rejected');
+        if (failures.length > 0) {
+          const firstFailure = failures[0] as PromiseRejectedResult;
+          if (failures.length === settled.length) {
+            storeErrors[adapter.storeName] = sanitizeStoreError(firstFailure.reason);
+          } else {
+            storeErrors[adapter.storeName] = `Some items could not be fetched (${failures.length} of ${settled.length} failed)`;
+          }
+        }
+
         const itemResults = settled.map((r) => (r.status === 'fulfilled' ? r.value : []));
         return { adapter, itemResults };
       })
     );
+
+    // Capture adapter-level errors (when entire adapter promise rejects)
+    for (let i = 0; i < adapterResults.length; i++) {
+      const adapterResult = adapterResults[i];
+      if (adapterResult.status === 'rejected') {
+        const adapter = this.adapters[i];
+        storeErrors[adapter.storeName] = sanitizeStoreError(adapterResult.reason);
+      }
+    }
 
     // Build ItemSearchResult[] from the adapter results
     const searchResults: ItemSearchResult[] = items.map((item, itemIndex) => {
@@ -94,7 +127,10 @@ export class SearchOrchestrator {
       };
     });
 
-    const response = buildComparisonResponse(searchResults);
+    const response: ComparisonResponse = {
+      ...buildComparisonResponse(searchResults),
+      ...(Object.keys(storeErrors).length > 0 ? { storeErrors } : {}),
+    };
 
     // Evict expired entries before inserting
     const now = Date.now();
@@ -102,13 +138,10 @@ export class SearchOrchestrator {
       if (entry.expiresAt <= now) this.cache.delete(key);
     }
 
-    // Enforce max cache size (evict oldest first)
+    // Enforce max cache size (evict oldest — Map preserves insertion order)
     if (this.cache.size >= MAX_CACHE_ENTRIES) {
-      const oldest = [...this.cache.entries()]
-        .sort((a, b) => a[1].expiresAt - b[1].expiresAt);
-      for (let i = 0; i < oldest.length - MAX_CACHE_ENTRIES + 1; i++) {
-        this.cache.delete(oldest[i][0]);
-      }
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) this.cache.delete(firstKey);
     }
 
     this.cache.set(cacheKey, {

@@ -48,12 +48,8 @@ export function buildStoreTotals(results: ItemSearchResult[]): StoreTotal[] {
     };
   });
 
-  return totals.sort((a, b) => {
-    const aFullyUnavail = a.unavailableCount === a.items.length;
-    const bFullyUnavail = b.unavailableCount === b.items.length;
-    if (aFullyUnavail !== bFullyUnavail) return aFullyUnavail ? 1 : -1;
-    return a.total - b.total;
-  });
+  // Fixed store order matching the design: woolworths, coles, aldi, harrisfarm
+  return totals;
 }
 
 export function buildMixAndMatch(results: ItemSearchResult[]): MixAndMatchResult {
@@ -68,19 +64,11 @@ export function buildMixAndMatch(results: ItemSearchResult[]): MixAndMatchResult
         lineTotal: 0,
       };
     }
-    // When any match provides unitPriceNormalised, compare by that metric.
-    // Matches missing unitPriceNormalised are treated as Infinity so they lose
-    // to matches with known per-unit pricing — this intentionally favours stores
-    // that report comparable unit prices over those that don't.
-    const hasNormalised = availableMatches.some((m) => m.unitPriceNormalised !== null);
-    const cheapest = availableMatches.reduce((best, curr) => {
-      if (hasNormalised) {
-        const bestVal = best.unitPriceNormalised ?? Infinity;
-        const currVal = curr.unitPriceNormalised ?? Infinity;
-        return currVal < bestVal ? curr : best;
-      }
-      return curr.price < best.price ? curr : best;
-    });
+    // Always compare by absolute price (same metric as store columns)
+    // so Mix & Match total represents the lowest possible spend.
+    const cheapest = availableMatches.reduce((best, curr) =>
+      curr.price < best.price ? curr : best,
+    );
     return {
       shoppingListItemId: result.shoppingListItemId,
       shoppingListItemName: result.shoppingListItemName,

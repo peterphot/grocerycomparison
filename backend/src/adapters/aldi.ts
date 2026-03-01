@@ -33,9 +33,7 @@ export class AldiAdapter implements StoreAdapter {
   async searchProduct(query: string): Promise<ProductMatch[]> {
     const url = `https://api.aldi.com.au/v3/product-search?q=${encodeURIComponent(query)}&serviceType=walk-in`;
     const data = await this.client.get<AldiResponse>(url, { headers: AldiAdapter.HEADERS });
-    return (data.data || [])
-      .filter(p => !p.notForSale)
-      .map(p => this.mapProduct(p));
+    return (data.data || []).map(p => this.mapProduct(p));
   }
 
   async isAvailable(): Promise<boolean> {

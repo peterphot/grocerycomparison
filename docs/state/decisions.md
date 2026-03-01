@@ -195,3 +195,88 @@ _Captured: 2026-02-28_
 - **Why**: This is an Australian product for Australian users. Australia uses the metric system exclusively. Imperial units add unnecessary complexity and are not used by Australian supermarkets.
 - **Alternatives**: Support both metric and imperial (rejected — unnecessary for AU market)
 - **Context**: User directive during PR #5 review. Affects unit-price.ts, all store adapters, and any size-string parsing.
+
+---
+
+## Clarify Phase (T018 UI Audit)
+_Captured: 2026-03-01T10:00:00Z_
+
+### D-CLARIFY-013: Focus on resilience, not fixing external APIs
+- **Who decided**: user
+- **What**: For B1/B2 (Coles/Aldi returning zero results), focus on error propagation (B3) and clear UI error states rather than fixing external API calls
+- **Why**: External APIs change frequently; resilience is more reliable than chasing moving targets
+- **Alternatives**: Fix Coles buildId regex and Aldi API headers directly
+- **Context**: Asked whether to fix actual API calls or focus on making the system resilient to adapter failures
+
+### D-CLARIFY-014: Mix & Match uses absolute price (same as store columns)
+- **Who decided**: user
+- **What**: Align Mix & Match algorithm to use absolute price per item, same as individual store columns
+- **Why**: Users expect lowest total spend, not best unit price
+- **Alternatives**: Keep unit price comparison, or communicate that Mix & Match optimizes by unit price
+- **Context**: B4 - Mix & Match was using unitPriceNormalised while store columns used absolute price
+
+### D-CLARIFY-015: Remove Help link entirely
+- **Who decided**: user
+- **What**: Remove the non-functional Help link from the header
+- **Why**: Simpler and cleaner than implementing a help modal
+- **Alternatives**: Implement a help section/modal
+- **Context**: UX1 - Help link navigated to #help anchor with no content
+
+### D-CLARIFY-016: Fixed store column order matching design
+- **Who decided**: user
+- **What**: Always show stores in fixed order: Woolworths, Coles, Aldi, Harris Farm, Mix & Match
+- **Why**: Matches the Pencil design file
+- **Alternatives**: Sort by price ascending, sort cheapest-with-results first
+- **Context**: F6 - Store column/tab order differed from design
+
+### D-CLARIFY-017: Show quantity badges on all items
+- **Who decided**: user
+- **What**: Show quantity badges on every item (not just when qty > 1)
+- **Why**: Matches the Pencil design
+- **Alternatives**: Only show when qty > 1, or show when any item has qty > 1
+- **Context**: F2 - Design shows qty badges on all items
+
+### D-CLARIFY-018: Save link scrolls to Mix & Match column/tab
+- **Who decided**: user
+- **What**: "Save $X with Mix & Match" link scrolls to Mix & Match column on desktop, switches to Mix & Match tab on mobile
+- **Why**: Natural navigation to the savings source
+- **Alternatives**: No navigation action, open a modal
+- **Context**: F4 - Missing "Save $X with Mix & Match" link/CTA
+
+### D-CLARIFY-019: Mobile default tab is cheapest store
+- **Who decided**: user
+- **What**: Auto-select the tab for the store marked as "cheapest store" on mobile
+- **Why**: Shows the most relevant store first
+- **Alternatives**: Default to first tab (Woolworths), default to Mix & Match
+- **Context**: F7 - Mobile results default tab should be cheapest store
+
+### D-CLARIFY-020: Simple SVG favicon with brand green
+- **Who decided**: user
+- **What**: Create a simple SVG favicon using brand color #16A34A
+- **Why**: Resolves 404 error and adds brand identity
+- **Alternatives**: Use a specific icon file, skip favicon
+- **Context**: M1 - Missing favicon causing 404
+
+### D-CLARIFY-021: Verify existing unit price handling for M2
+- **Who decided**: user
+- **What**: Verify current conditional rendering handles missing unit price correctly and call M2 done
+- **Why**: Data quality issue from source API, current code already handles null gracefully
+- **Alternatives**: Add explicit "unit price not available" text
+- **Context**: M2 - Harris Farm bread missing unit price data
+
+## Orchestrate Phase (T018 UI Audit)
+_Captured: 2026-03-01T10:00:00Z_
+
+### D-ORCH-005: Scale assessment - MEDIUM (15 issues, 8 tasks)
+- **Who decided**: claude
+- **What**: Assessed T018 as MEDIUM scale (~8 implementation tasks covering 15 active issues)
+- **Why**: 15 issues but many are small frontend tweaks that can be grouped; 2 critical backend issues (B1/B2) are being addressed via B3 resilience approach
+- **Alternatives**: SMALL (too few tasks), LARGE (too many tasks)
+- **Context**: Scale assessment for workflow planning
+
+### D-ORCH-006: Standard orchestration pattern
+- **Who decided**: claude
+- **What**: Using STANDARD pattern (sequential execution)
+- **Why**: Tasks have dependencies (B3 must come before frontend error states; B4 before F4 savings calculation); not enough independent work to justify parallel
+- **Alternatives**: PARALLEL (some frontend fixes could run in parallel), COUNCIL (overkill for bug fixes)
+- **Context**: Orchestration pattern selection

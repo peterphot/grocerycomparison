@@ -153,6 +153,102 @@ describe('SearchOrchestrator', () => {
       expect(woolworths!.items[0].match).not.toBeNull();
     });
 
+    it('includes storeErrors in response when an adapter fails', async () => {
+      const adapters = [
+        createMockAdapter('woolworths', [[makeMatch({ store: 'woolworths', price: 3 })]]),
+        createFailingAdapter('coles'),
+        createMockAdapter('aldi', [[makeMatch({ store: 'aldi', price: 5 })]]),
+        createMockAdapter('harrisfarm', [[makeMatch({ store: 'harrisfarm', price: 6 })]]),
+      ];
+      const orchestrator = new SearchOrchestrator(adapters);
+      const items = [makeItem()];
+
+      const result = await orchestrator.search(items);
+
+      expect(result).toHaveProperty('storeErrors');
+      expect(result.storeErrors).toBeDefined();
+      expect(result.storeErrors!['coles']).toBe('Unable to fetch results from this store');
+      expect(result.storeErrors!['woolworths']).toBeUndefined();
+    });
+
+    it('includes storeErrors for multiple failing adapters', async () => {
+      const adapters = [
+        createMockAdapter('woolworths', [[makeMatch({ store: 'woolworths', price: 3 })]]),
+        createFailingAdapter('coles'),
+        createFailingAdapter('aldi'),
+        createMockAdapter('harrisfarm', [[makeMatch({ store: 'harrisfarm', price: 6 })]]),
+      ];
+      const orchestrator = new SearchOrchestrator(adapters);
+      const items = [makeItem()];
+
+      const result = await orchestrator.search(items);
+
+      expect(result.storeErrors!['coles']).toBe('Unable to fetch results from this store');
+      expect(result.storeErrors!['aldi']).toBe('Unable to fetch results from this store');
+      expect(result.storeErrors!['woolworths']).toBeUndefined();
+      expect(result.storeErrors!['harrisfarm']).toBeUndefined();
+    });
+
+    it('omits storeErrors when no adapters fail', async () => {
+      const adapters = [
+        createMockAdapter('woolworths', [[makeMatch({ store: 'woolworths', price: 3 })]]),
+        createMockAdapter('coles', [[makeMatch({ store: 'coles', price: 4 })]]),
+        createMockAdapter('aldi', [[makeMatch({ store: 'aldi', price: 5 })]]),
+        createMockAdapter('harrisfarm', [[makeMatch({ store: 'harrisfarm', price: 6 })]]),
+      ];
+      const orchestrator = new SearchOrchestrator(adapters);
+      const items = [makeItem()];
+
+      const result = await orchestrator.search(items);
+
+      expect(result.storeErrors).toBeUndefined();
+    });
+
+    it('captures per-item errors from individual product searches', async () => {
+      // Create an adapter that fails for the second item only
+      let callCount = 0;
+      const partialFailAdapter: StoreAdapter = {
+        storeName: 'coles' as any,
+        displayName: 'coles',
+        searchProduct: vi.fn(async (_query: string) => {
+          callCount++;
+          if (callCount === 2) throw new Error('timeout on bread');
+          return [makeMatch({ store: 'coles', price: 4 })];
+        }),
+        isAvailable: vi.fn(async () => true),
+      };
+
+      const adapters = [
+        createMockAdapter('woolworths', [
+          [makeMatch({ store: 'woolworths', price: 3 })],
+          [makeMatch({ store: 'woolworths', price: 2 })],
+        ]),
+        partialFailAdapter,
+        createMockAdapter('aldi', [
+          [makeMatch({ store: 'aldi', price: 5 })],
+          [makeMatch({ store: 'aldi', price: 4 })],
+        ]),
+        createMockAdapter('harrisfarm', [
+          [makeMatch({ store: 'harrisfarm', price: 6 })],
+          [makeMatch({ store: 'harrisfarm', price: 5 })],
+        ]),
+      ];
+      const orchestrator = new SearchOrchestrator(adapters);
+      const items = [
+        makeItem({ id: 'item-1', name: 'milk' }),
+        makeItem({ id: 'item-2', name: 'bread' }),
+      ];
+
+      const result = await orchestrator.search(items);
+
+      // Coles should still have item-1 match (succeeded) but item-2 should be null (failed)
+      const coles = result.storeTotals.find((st: any) => st.store === 'coles');
+      expect(coles!.items[0].match).not.toBeNull(); // milk succeeded
+      expect(coles!.items[1].match).toBeNull(); // bread failed
+      // Partial failure should show count in error message
+      expect(result.storeErrors!['coles']).toBe('Some items could not be fetched (1 of 2 failed)');
+    });
+
     it('marks all items as unavailable for a failed store', async () => {
       const adapters = [
         createMockAdapter('woolworths', [
