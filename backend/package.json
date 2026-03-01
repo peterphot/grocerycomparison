@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "prebuild": "cd .. && npm run build -w packages/shared",
     "build": "tsc",
     "test": "vitest run",
     "start": "node dist/index.js"
