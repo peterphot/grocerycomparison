@@ -65,7 +65,17 @@ export class WoolworthsAdapter implements StoreAdapter {
   }
 
   private normaliseMeasure(cupMeasure: string): string {
-    // "1L" -> "L", "1kg" -> "kg", "100g" -> "100g", "100ml" -> "100ml"
-    return cupMeasure.replace(/^1(?=[a-zA-Z])/, '') || cupMeasure;
+    // Normalise to consistent casing: "1L" -> "L", "1KG" -> "kg", "100G" -> "100g"
+    // Strip leading "1" when followed by a unit letter (e.g., "1L" -> "L")
+    const stripped = cupMeasure.replace(/^1(?=[a-zA-Z])/, '') || cupMeasure;
+    // Lowercase everything except "L" (litre) which is conventionally uppercase
+    // Match the number prefix + unit suffix pattern
+    const match = stripped.match(/^(\d*)([a-zA-Z]+)$/);
+    if (!match) return stripped;
+    const [, num, unit] = match;
+    const lowerUnit = unit.toLowerCase();
+    // "L" stays uppercase, everything else lowercase: g, kg, ml
+    const normalisedUnit = lowerUnit === 'l' ? 'L' : lowerUnit;
+    return num + normalisedUnit;
   }
 }

@@ -84,6 +84,61 @@ describe('WoolworthsAdapter', () => {
     await expect(adapter.searchProduct('milk')).rejects.toThrow(StoreApiError);
   });
 
+  it('normalises CupMeasure to lowercase (100G -> 100g)', async () => {
+    mockSearchSuccess({
+      Products: [
+        {
+          Products: [
+            {
+              DisplayName: 'Vegemite 380g',
+              Price: 7.70,
+              PackageSize: '380g',
+              CupPrice: 2.03,
+              CupMeasure: '100G',
+              Brand: 'Vegemite',
+              IsAvailable: true,
+            },
+          ],
+        },
+      ],
+    });
+    const results = await adapter.searchProduct('vegemite');
+    expect(results[0].unitMeasure).toBe('100g');
+    expect(results[0].unitPrice).toBe(2.03);
+  });
+
+  it('normalises CupMeasure L and kg correctly', async () => {
+    mockSearchSuccess({
+      Products: [
+        {
+          Products: [
+            {
+              DisplayName: 'Milk 3L',
+              Price: 4.65,
+              PackageSize: '3L',
+              CupPrice: 1.55,
+              CupMeasure: '1L',
+              Brand: 'Woolworths',
+              IsAvailable: true,
+            },
+            {
+              DisplayName: 'Rice 1KG',
+              Price: 3.00,
+              PackageSize: '1kg',
+              CupPrice: 3.00,
+              CupMeasure: '1KG',
+              Brand: 'SunRice',
+              IsAvailable: true,
+            },
+          ],
+        },
+      ],
+    });
+    const results = await adapter.searchProduct('milk');
+    expect(results[0].unitMeasure).toBe('L');
+    expect(results[1].unitMeasure).toBe('kg');
+  });
+
   it('isAvailable returns true when API responds', async () => {
     mockSearchSuccess();
     const result = await adapter.isAvailable();
