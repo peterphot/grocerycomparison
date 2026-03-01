@@ -127,12 +127,10 @@ export class SearchOrchestrator {
       };
     });
 
-    const response = buildComparisonResponse(searchResults);
-
-    // Include storeErrors only when there are actual errors
-    if (Object.keys(storeErrors).length > 0) {
-      response.storeErrors = storeErrors;
-    }
+    const response: ComparisonResponse = {
+      ...buildComparisonResponse(searchResults),
+      ...(Object.keys(storeErrors).length > 0 ? { storeErrors } : {}),
+    };
 
     // Evict expired entries before inserting
     const now = Date.now();
@@ -140,13 +138,10 @@ export class SearchOrchestrator {
       if (entry.expiresAt <= now) this.cache.delete(key);
     }
 
-    // Enforce max cache size (evict oldest first)
+    // Enforce max cache size (evict oldest — Map preserves insertion order)
     if (this.cache.size >= MAX_CACHE_ENTRIES) {
-      const oldest = [...this.cache.entries()]
-        .sort((a, b) => a[1].expiresAt - b[1].expiresAt);
-      for (let i = 0; i < oldest.length - MAX_CACHE_ENTRIES + 1; i++) {
-        this.cache.delete(oldest[i][0]);
-      }
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) this.cache.delete(firstKey);
     }
 
     this.cache.set(cacheKey, {

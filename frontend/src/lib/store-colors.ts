@@ -1,4 +1,5 @@
 import type { StoreName } from '@grocery/shared';
+import { ALL_STORES, STORE_DISPLAY_NAMES } from '@grocery/shared';
 
 export type StoreColorKey = StoreName | 'mixandmatch';
 
@@ -10,11 +11,6 @@ export const STORE_COLORS: Record<StoreColorKey, string> = {
   mixandmatch: '#7C3AED',
 };
 
-export const STORE_DISPLAY_NAMES: Record<StoreName, string> = {
-  woolworths: 'Woolworths',
-  coles: 'Coles',
-  aldi: 'Aldi',
-  harrisfarm: 'Harris Farm',
-};
+export { STORE_DISPLAY_NAMES };
 
-export const ALL_STORE_KEYS: StoreName[] = ['woolworths', 'coles', 'aldi', 'harrisfarm'];
+export const ALL_STORE_KEYS: readonly StoreName[] = ALL_STORES;
