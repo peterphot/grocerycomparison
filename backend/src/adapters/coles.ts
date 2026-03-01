@@ -66,7 +66,7 @@ export class ColesAdapter implements StoreAdapter {
       );
     }
 
-    const url = `https://www.coles.com.au/_next/data/${buildId}/search/products.json?keyword=${encodeURIComponent(query)}`;
+    const url = `https://www.coles.com.au/_next/data/${buildId}/search/products.json?q=${encodeURIComponent(query)}`;
 
     const data = await this.client.get<ColesSearchResponse>(url, {
       headers: {

@@ -37,8 +37,8 @@ describe('ColesAdapter', () => {
     server.use(
       http.get('https://www.coles.com.au/_next/data/:buildId/search/products.json', ({ request }) => {
         const url = new URL(request.url);
-        const keyword = url.searchParams.get('keyword');
-        if (keyword) {
+        const q = url.searchParams.get('q');
+        if (q) {
           return HttpResponse.json(milkFixture);
         }
         return HttpResponse.json({ pageProps: { searchResults: { results: [] } } });
