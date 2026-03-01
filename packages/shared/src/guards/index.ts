@@ -41,7 +41,8 @@ export function isProductMatch(value: unknown): value is ProductMatch {
     (value.unitPrice === null || typeof value.unitPrice === 'number') &&
     (value.unitMeasure === null || typeof value.unitMeasure === 'string') &&
     (value.unitPriceNormalised === null || typeof value.unitPriceNormalised === 'number') &&
-    typeof value.available === 'boolean'
+    typeof value.available === 'boolean' &&
+    (value.productUrl === null || typeof value.productUrl === 'string')
   );
 }
 
