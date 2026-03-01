@@ -1,4 +1,4 @@
-import type { StoreName } from './product.js';
+import type { StoreName } from './product';
 
 export class StoreApiError extends Error {
   constructor(

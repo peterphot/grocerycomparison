@@ -1,4 +1,4 @@
-import type { StoreName, ProductMatch } from './product.js';
+import type { StoreName, ProductMatch } from './product';
 
 export interface StoreItemResult {
   shoppingListItemId: string;

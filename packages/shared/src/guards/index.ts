@@ -1,6 +1,6 @@
-import type { ShoppingListItem } from '../types/shopping-list.js';
-import type { ProductMatch } from '../types/product.js';
-import type { ComparisonResponse } from '../types/comparison.js';
+import type { ShoppingListItem } from '../types/shopping-list';
+import type { ProductMatch } from '../types/product';
+import type { ComparisonResponse } from '../types/comparison';
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
