@@ -142,9 +142,9 @@ describe('ComparisonResults', () => {
 });
 
 describe('ItemRow', () => {
-  const availableItem = mockComparisonResponse.storeTotals[0].items[0]; // Coles milk, has unitPrice
-  const unavailableItem = mockComparisonResponse.storeTotals[3].items[2]; // Aldi eggs, match null
-  const noUnitPriceItem = mockComparisonResponse.storeTotals[0].items[2]; // Coles eggs, unitPrice null
+  const availableItem = mockComparisonResponse.storeTotals[1].items[0]; // Coles milk, has unitPrice
+  const unavailableItem = mockComparisonResponse.storeTotals[2].items[2]; // Aldi eggs, match null
+  const noUnitPriceItem = mockComparisonResponse.storeTotals[1].items[2]; // Coles eggs, unitPrice null
 
   it('shows shopping list item name as label', () => {
     render(
@@ -206,7 +206,7 @@ describe('ItemRow', () => {
     expect(screen.getByText('qty 2')).toBeInTheDocument();
   });
 
-  it('does not show qty badge when quantity is 1', () => {
+  it('shows qty badge even when quantity is 1 (F2)', () => {
     render(
       <ItemRow
         match={availableItem.match}
@@ -214,13 +214,40 @@ describe('ItemRow', () => {
         quantity={1}
       />,
     );
-    expect(screen.queryByText(/qty/)).not.toBeInTheDocument();
+    expect(screen.getByText('qty 1')).toBeInTheDocument();
+  });
+
+  it('has gap between product name and price (F1)', () => {
+    const { container } = render(
+      <ItemRow
+        match={availableItem.match}
+        lineTotal={availableItem.lineTotal}
+        quantity={1}
+      />,
+    );
+    // The flex container should have a gap between name and price
+    const flexContainer = container.querySelector('.flex.justify-between');
+    expect(flexContainer).toBeInTheDocument();
+    // Verify it has gap class
+    expect(flexContainer?.className).toContain('gap-');
+  });
+
+  it('shows store source badge when showStoreSource is true (F8)', () => {
+    render(
+      <ItemRow
+        match={availableItem.match}
+        lineTotal={availableItem.lineTotal}
+        quantity={1}
+        showStoreSource={true}
+      />,
+    );
+    expect(screen.getByText('Coles')).toBeInTheDocument();
   });
 });
 
 describe('StoreColumn', () => {
-  const colesStore = mockComparisonResponse.storeTotals[0];
-  const aldiStore = mockComparisonResponse.storeTotals[3]; // has 1 unavailable item
+  const colesStore = mockComparisonResponse.storeTotals[1];
+  const aldiStore = mockComparisonResponse.storeTotals[2]; // has 1 unavailable item
 
   it('renders store name in header', () => {
     render(<StoreColumn storeTotal={colesStore} isCheapest={false} />);
@@ -384,7 +411,7 @@ describe('findCheapestStore', () => {
 
   it('returns sole store when only one exists', () => {
     const result = findCheapestStore([storeTotals[0]]);
-    expect(result?.store).toBe('coles');
+    expect(result?.store).toBe('woolworths');
   });
 
   it('returns undefined for empty array', () => {

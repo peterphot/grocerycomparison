@@ -3,18 +3,6 @@ import type { ComparisonResponse } from '@grocery/shared';
 export const mockComparisonResponse: ComparisonResponse = {
   storeTotals: [
     {
-      store: 'coles',
-      storeName: 'Coles',
-      items: [
-        { shoppingListItemId: 'item-1', shoppingListItemName: 'milk 2L', quantity: 1, match: { store: 'coles', productName: 'Coles Full Cream Milk 2L', brand: 'Coles', price: 3.10, packageSize: '2L', unitPrice: 1.55, unitMeasure: 'L', unitPriceNormalised: 0.155, available: true }, lineTotal: 3.10 },
-        { shoppingListItemId: 'item-2', shoppingListItemName: 'bread', quantity: 2, match: { store: 'coles', productName: 'Coles White Bread 700g', brand: 'Coles', price: 3.50, packageSize: '700g', unitPrice: 0.50, unitMeasure: '100g', unitPriceNormalised: 0.50, available: true }, lineTotal: 7.00 },
-        { shoppingListItemId: 'item-3', shoppingListItemName: 'eggs', quantity: 1, match: { store: 'coles', productName: 'Coles Free Range Eggs 12pk', brand: 'Coles', price: 5.50, packageSize: '12 pack', unitPrice: null, unitMeasure: null, unitPriceNormalised: null, available: true }, lineTotal: 5.50 },
-      ],
-      total: 15.60,
-      unavailableCount: 0,
-      allItemsAvailable: true,
-    },
-    {
       store: 'woolworths',
       storeName: 'Woolworths',
       items: [
@@ -27,14 +15,14 @@ export const mockComparisonResponse: ComparisonResponse = {
       allItemsAvailable: true,
     },
     {
-      store: 'harrisfarm',
-      storeName: 'Harris Farm',
+      store: 'coles',
+      storeName: 'Coles',
       items: [
-        { shoppingListItemId: 'item-1', shoppingListItemName: 'milk 2L', quantity: 1, match: { store: 'harrisfarm', productName: 'Harris Farm Milk 2L', brand: 'Harris Farm', price: 3.20, packageSize: '2L', unitPrice: 1.60, unitMeasure: 'L', unitPriceNormalised: 0.160, available: true }, lineTotal: 3.20 },
-        { shoppingListItemId: 'item-2', shoppingListItemName: 'bread', quantity: 2, match: { store: 'harrisfarm', productName: 'Harris Farm Sourdough 700g', brand: 'Harris Farm', price: 5.50, packageSize: '700g', unitPrice: 0.79, unitMeasure: '100g', unitPriceNormalised: 0.79, available: true }, lineTotal: 11.00 },
-        { shoppingListItemId: 'item-3', shoppingListItemName: 'eggs', quantity: 1, match: { store: 'harrisfarm', productName: 'Harris Farm Free Range Eggs 12pk', brand: 'Harris Farm', price: 7.00, packageSize: '12 pack', unitPrice: null, unitMeasure: null, unitPriceNormalised: null, available: true }, lineTotal: 7.00 },
+        { shoppingListItemId: 'item-1', shoppingListItemName: 'milk 2L', quantity: 1, match: { store: 'coles', productName: 'Coles Full Cream Milk 2L', brand: 'Coles', price: 3.10, packageSize: '2L', unitPrice: 1.55, unitMeasure: 'L', unitPriceNormalised: 0.155, available: true }, lineTotal: 3.10 },
+        { shoppingListItemId: 'item-2', shoppingListItemName: 'bread', quantity: 2, match: { store: 'coles', productName: 'Coles White Bread 700g', brand: 'Coles', price: 3.50, packageSize: '700g', unitPrice: 0.50, unitMeasure: '100g', unitPriceNormalised: 0.50, available: true }, lineTotal: 7.00 },
+        { shoppingListItemId: 'item-3', shoppingListItemName: 'eggs', quantity: 1, match: { store: 'coles', productName: 'Coles Free Range Eggs 12pk', brand: 'Coles', price: 5.50, packageSize: '12 pack', unitPrice: null, unitMeasure: null, unitPriceNormalised: null, available: true }, lineTotal: 5.50 },
       ],
-      total: 21.20,
+      total: 15.60,
       unavailableCount: 0,
       allItemsAvailable: true,
     },
@@ -49,6 +37,18 @@ export const mockComparisonResponse: ComparisonResponse = {
       total: 6.47,
       unavailableCount: 1,
       allItemsAvailable: false,
+    },
+    {
+      store: 'harrisfarm',
+      storeName: 'Harris Farm',
+      items: [
+        { shoppingListItemId: 'item-1', shoppingListItemName: 'milk 2L', quantity: 1, match: { store: 'harrisfarm', productName: 'Harris Farm Milk 2L', brand: 'Harris Farm', price: 3.20, packageSize: '2L', unitPrice: 1.60, unitMeasure: 'L', unitPriceNormalised: 0.160, available: true }, lineTotal: 3.20 },
+        { shoppingListItemId: 'item-2', shoppingListItemName: 'bread', quantity: 2, match: { store: 'harrisfarm', productName: 'Harris Farm Sourdough 700g', brand: 'Harris Farm', price: 5.50, packageSize: '700g', unitPrice: 0.79, unitMeasure: '100g', unitPriceNormalised: 0.79, available: true }, lineTotal: 11.00 },
+        { shoppingListItemId: 'item-3', shoppingListItemName: 'eggs', quantity: 1, match: { store: 'harrisfarm', productName: 'Harris Farm Free Range Eggs 12pk', brand: 'Harris Farm', price: 7.00, packageSize: '12 pack', unitPrice: null, unitMeasure: null, unitPriceNormalised: null, available: true }, lineTotal: 7.00 },
+      ],
+      total: 21.20,
+      unavailableCount: 0,
+      allItemsAvailable: true,
     },
   ],
   mixAndMatch: {

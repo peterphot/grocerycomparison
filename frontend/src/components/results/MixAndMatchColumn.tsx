@@ -29,6 +29,7 @@ export const MixAndMatchColumn = memo(function MixAndMatchColumn({ mixAndMatch }
           lineTotal={item.lineTotal}
           shoppingListItemName={item.shoppingListItemName}
           quantity={item.quantity}
+          showStoreSource={true}
         />
       ))}
     </ResultColumn>
