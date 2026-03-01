@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useId } from 'react';
 import { X } from 'lucide-react';
 import { BrandToggle } from './BrandToggle';
 import type { ShoppingListItem as ShoppingListItemType } from '../../hooks/useShoppingList';
@@ -13,6 +13,8 @@ interface ShoppingListItemProps {
 }
 
 export const ShoppingListItem = memo(function ShoppingListItem({ item, onChange, onRemove, showRemove }: ShoppingListItemProps) {
+  const reactId = useId();
+
   const handleNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => onChange(item.id, { name: e.target.value }),
     [item.id, onChange],
@@ -40,8 +42,8 @@ export const ShoppingListItem = memo(function ShoppingListItem({ item, onChange,
       <div className="flex items-center gap-3">
         <input
           type="text"
-          id={`item-name-${item.id}`}
-          name={`item-name-${item.id}`}
+          id={`item-name-${reactId}`}
+          name={`item-name-${reactId}`}
           value={item.name}
           onChange={handleNameChange}
           placeholder="e.g. milk 2L"
@@ -49,8 +51,8 @@ export const ShoppingListItem = memo(function ShoppingListItem({ item, onChange,
         />
         <input
           type="number"
-          id={`item-qty-${item.id}`}
-          name={`item-qty-${item.id}`}
+          id={`item-qty-${reactId}`}
+          name={`item-qty-${reactId}`}
           value={item.quantity}
           onChange={handleQtyChange}
           min={1}
