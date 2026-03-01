@@ -6,6 +6,12 @@ import { ColesSessionManager } from '../utils/coles-session';
 import { validateProductUrl } from '../utils/product-url';
 import type { StoreAdapter } from './store-adapter';
 
+interface ColesOnlineHeir {
+  aisle: string;
+  category: string;
+  subCategory: string;
+}
+
 interface ColesProduct {
   _type: string;
   id: number;
@@ -20,6 +26,7 @@ interface ColesProduct {
       ofMeasureUnits: string;
     };
   };
+  onlineHeirs?: ColesOnlineHeir[];
 }
 
 interface ColesSearchResponse {
@@ -66,7 +73,7 @@ export class ColesAdapter implements StoreAdapter {
       );
     }
 
-    const url = `https://www.coles.com.au/_next/data/${buildId}/search/products.json?keyword=${encodeURIComponent(query)}`;
+    const url = `https://www.coles.com.au/_next/data/${buildId}/search/products.json?q=${encodeURIComponent(query)}`;
 
     const data = await this.client.get<ColesSearchResponse>(url, {
       headers: {
@@ -75,9 +82,12 @@ export class ColesAdapter implements StoreAdapter {
     });
 
     const results = data.pageProps.searchResults.results;
+    const available = results.filter(
+      (item) => item._type === 'PRODUCT' && item.availability === true && item.pricing,
+    );
+    const filtered = this.filterByCategory(available);
 
-    return results
-      .filter((item) => item._type === 'PRODUCT' && item.availability === true && item.pricing)
+    return filtered
       .map((item) => {
         const pricing = item.pricing!;
         const pkg = item.size ? parsePackageSize(item.size) : null;
@@ -106,6 +116,33 @@ export class ColesAdapter implements StoreAdapter {
           productUrl,
         };
       });
+  }
+
+  private filterByCategory(products: ColesProduct[]): ColesProduct[] {
+    if (products.length <= 1) return products;
+
+    const topProduct = products[0];
+    const topAisle = topProduct.onlineHeirs?.[0]?.aisle;
+
+    if (!topAisle) return products.slice(0, 3);
+
+    // Filter to same aisle as top result (most specific category)
+    const aisleFiltered = products.filter(
+      (p) => p.onlineHeirs?.[0]?.aisle === topAisle,
+    );
+    if (aisleFiltered.length > 1) return aisleFiltered;
+
+    // Fallback: broaden to category level (e.g., "Milk")
+    const topCategory = topProduct.onlineHeirs?.[0]?.category;
+    if (topCategory) {
+      const categoryFiltered = products.filter(
+        (p) => p.onlineHeirs?.[0]?.category === topCategory,
+      );
+      if (categoryFiltered.length > 1) return categoryFiltered;
+    }
+
+    // Final fallback: top 3 by API position
+    return products.slice(0, 3);
   }
 
   async isAvailable(): Promise<boolean> {
