@@ -271,6 +271,55 @@ describe('ItemRow', () => {
     );
     expect(screen.getByText('Coles')).toBeInTheDocument();
   });
+
+  it('renders product name as a link when productUrl is present', () => {
+    render(
+      <ItemRow
+        match={availableItem.match}
+        lineTotal={availableItem.lineTotal}
+      />,
+    );
+    const link = screen.getByRole('link', { name: /Coles Full Cream Milk 2L/ });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', availableItem.match!.productUrl);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('does not render a link when productUrl is null', () => {
+    const matchNoUrl = { ...availableItem.match!, productUrl: null };
+    render(
+      <ItemRow
+        match={matchNoUrl}
+        lineTotal={availableItem.lineTotal}
+      />,
+    );
+    expect(screen.getByText('Coles Full Cream Milk 2L')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('renders an external link icon when productUrl is present', () => {
+    const { container } = render(
+      <ItemRow
+        match={availableItem.match}
+        lineTotal={availableItem.lineTotal}
+      />,
+    );
+    // lucide-react ExternalLink renders as an SVG
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+  });
+
+  it('does not render external link icon when match is null', () => {
+    const { container } = render(
+      <ItemRow
+        match={unavailableItem.match}
+        lineTotal={unavailableItem.lineTotal}
+      />,
+    );
+    const svg = container.querySelector('svg');
+    expect(svg).not.toBeInTheDocument();
+  });
 });
 
 describe('StoreColumn', () => {
