@@ -15,7 +15,8 @@
             "was": 0,
             "unit": { "quantity": 1, "ofMeasureQuantity": 1, "ofMeasureUnits": "l", "price": 1.55 },
             "comparable": "$1.55/ 1L"
-          }
+          },
+          "onlineHeirs": [{ "aisle": "Full Cream Milk", "category": "Milk", "subCategory": "Dairy, Eggs & Fridge" }]
         },
         {
           "_type": "PRODUCT",
@@ -27,7 +28,8 @@
           "pricing": {
             "now": 3.10,
             "unit": { "quantity": 1, "ofMeasureQuantity": 1, "ofMeasureUnits": "l", "price": 1.55 }
-          }
+          },
+          "onlineHeirs": [{ "aisle": "Skim & Low Fat Milk", "category": "Milk", "subCategory": "Dairy, Eggs & Fridge" }]
         },
         {
           "_type": "PROMOTION",
@@ -44,7 +46,8 @@
           "pricing": {
             "now": 5.00,
             "unit": { "quantity": 1, "ofMeasureQuantity": 1, "ofMeasureUnits": "l", "price": 5.00 }
-          }
+          },
+          "onlineHeirs": [{ "aisle": "Specialty Milk", "category": "Milk", "subCategory": "Dairy, Eggs & Fridge" }]
         }
       ]
     }
