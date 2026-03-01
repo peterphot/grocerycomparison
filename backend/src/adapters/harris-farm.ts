@@ -9,6 +9,7 @@ interface ShopifyProduct {
   handle: string;
   available: boolean;
   price: string;
+  price_max: string;
   tags?: string[];
   vendor: string;
 }
@@ -44,7 +45,7 @@ export class HarrisFarmAdapter implements StoreAdapter {
   }
 
   private mapProduct(p: ShopifyProduct): ProductMatch {
-    const price = parseFloat(p.price);
+    const price = parseFloat(p.price_max || p.price);
     const sizeMatch = p.title.match(/(\d+(?:\.\d+)?)\s*(kg|ml|g|l)\b/i);
     const parsed = parsePackageSize(p.title);
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;

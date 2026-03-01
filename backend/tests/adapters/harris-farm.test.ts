@@ -34,7 +34,7 @@ describe('HarrisFarmAdapter', () => {
     const results = await adapter.searchProduct('milk');
     const milk = results.find((r) => r.productName.includes('Lite Milk'));
 
-    expect(milk?.price).toBe(3.1);
+    expect(milk?.price).toBe(3.2);
   });
 
   it('extracts "2L" from title and computes unit price', async () => {
