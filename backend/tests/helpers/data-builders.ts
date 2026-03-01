@@ -11,6 +11,7 @@ export function makeMatch(overrides?: Partial<ProductMatch>): ProductMatch {
     unitMeasure: 'L',
     unitPriceNormalised: null,
     available: true,
+    productUrl: null,
     ...overrides,
   };
 }

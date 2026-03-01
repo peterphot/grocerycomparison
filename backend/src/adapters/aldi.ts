@@ -51,6 +51,8 @@ export class AldiAdapter implements StoreAdapter {
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
 
+    const productUrl = `https://www.aldi.com.au/en/search/?text=${encodeURIComponent(p.name)}`;
+
     return {
       store: this.storeName,
       productName: p.name,
@@ -61,6 +63,7 @@ export class AldiAdapter implements StoreAdapter {
       unitMeasure: display?.unitMeasure ?? null,
       unitPriceNormalised: normalised,
       available: true,
+      productUrl,
     };
   }
 }

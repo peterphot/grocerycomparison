@@ -50,6 +50,10 @@ export class HarrisFarmAdapter implements StoreAdapter {
     const display = parsed ? computeDisplayUnitPrice(price, parsed.qty, parsed.unit) : null;
     const normalised = parsed ? computeNormalisedUnitPrice(price, parsed.qty, parsed.unit) : null;
 
+    const productUrl = p.handle
+      ? `https://www.harrisfarm.com.au/products/${p.handle}`
+      : null;
+
     return {
       store: this.storeName,
       productName: p.title,
@@ -60,6 +64,7 @@ export class HarrisFarmAdapter implements StoreAdapter {
       unitMeasure: display?.unitMeasure ?? null,
       unitPriceNormalised: normalised,
       available: true,
+      productUrl,
     };
   }
 }

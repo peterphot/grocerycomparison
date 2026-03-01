@@ -34,6 +34,14 @@ function normaliseUnitMeasure(unit: string): string {
   return unit;
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 export class ColesAdapter implements StoreAdapter {
   readonly storeName = 'coles' as const;
   readonly displayName = 'Coles';
@@ -79,6 +87,8 @@ export class ColesAdapter implements StoreAdapter {
           ? computeNormalisedUnitPrice(pricing.now, pkg.qty, pkg.unit)
           : null;
 
+        const productUrl = `https://www.coles.com.au/product/${slugify(item.name)}-${item.id}`;
+
         return {
           store: this.storeName,
           productName: item.name,
@@ -89,6 +99,7 @@ export class ColesAdapter implements StoreAdapter {
           unitMeasure,
           unitPriceNormalised,
           available: true,
+          productUrl,
         };
       });
   }

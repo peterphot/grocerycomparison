@@ -128,6 +128,23 @@ describe('AldiAdapter', () => {
     expect(capturedHeaders?.get('Referer')).toBe('https://www.aldi.com.au/');
   });
 
+  it('populates productUrl with Aldi search URL', async () => {
+    server.use(
+      http.get('https://api.aldi.com.au/v3/product-search', () => {
+        return HttpResponse.json(aldiMilkFixture);
+      }),
+    );
+
+    const results = await adapter.searchProduct('milk');
+
+    expect(results[0].productUrl).toBe(
+      'https://www.aldi.com.au/en/search/?text=Farmdale%20Full%20Cream%20Milk%202L',
+    );
+    expect(results[1].productUrl).toBe(
+      'https://www.aldi.com.au/en/search/?text=Farmdale%20Thickened%20Cream%20300ml',
+    );
+  });
+
   it('returns empty array when no products found', async () => {
     server.use(
       http.get('https://api.aldi.com.au/v3/product-search', () => {

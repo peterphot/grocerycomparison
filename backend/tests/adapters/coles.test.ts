@@ -94,6 +94,22 @@ describe('ColesAdapter', () => {
     expect(names).not.toContain('Soy Milk');
   });
 
+  it('populates productUrl with slugified Coles product URL', async () => {
+    const results = await adapter.searchProduct('milk');
+    const fullCream = results.find((r) => r.productName === 'Full Cream Milk')!;
+    expect(fullCream.productUrl).toBe(
+      'https://www.coles.com.au/product/full-cream-milk-8150288',
+    );
+  });
+
+  it('handles Coles product URL slug with special characters', async () => {
+    const results = await adapter.searchProduct('milk');
+    const liteMilk = results.find((r) => r.productName === 'Lite Milk')!;
+    expect(liteMilk.productUrl).toBe(
+      'https://www.coles.com.au/product/lite-milk-8150290',
+    );
+  });
+
   it('wraps session failure as StoreApiError', async () => {
     server.use(
       http.get('https://www.coles.com.au/', () => {

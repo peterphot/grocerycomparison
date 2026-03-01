@@ -51,6 +51,8 @@ export class WoolworthsAdapter implements StoreAdapter {
       ? computeNormalisedUnitPrice(p.Price, packageParsed.qty, packageParsed.unit)
       : null;
 
+    const productUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodeURIComponent(p.DisplayName)}`;
+
     return {
       store: this.storeName,
       productName: p.DisplayName,
@@ -61,6 +63,7 @@ export class WoolworthsAdapter implements StoreAdapter {
       unitMeasure,
       unitPriceNormalised,
       available: true,
+      productUrl,
     };
   }
 

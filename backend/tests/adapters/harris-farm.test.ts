@@ -85,6 +85,26 @@ describe('HarrisFarmAdapter', () => {
     expect(box!.unitPriceNormalised).toBeNull();
   });
 
+  it('populates productUrl with Harris Farm Shopify URL from handle', async () => {
+    server.use(
+      http.get('https://www.harrisfarm.com.au/search/suggest.json', () => {
+        return HttpResponse.json(fixture);
+      }),
+    );
+
+    const results = await adapter.searchProduct('milk');
+
+    expect(results[0].productUrl).toBe(
+      'https://www.harrisfarm.com.au/products/milk-lite-2l-harris-farm-88662',
+    );
+    expect(results[1].productUrl).toBe(
+      'https://www.harrisfarm.com.au/products/yoghurt-greek-500g-harris-farm',
+    );
+    expect(results[2].productUrl).toBe(
+      'https://www.harrisfarm.com.au/products/seasonal-fruit-box',
+    );
+  });
+
   it('filters out unavailable products', async () => {
     server.use(
       http.get('https://www.harrisfarm.com.au/search/suggest.json', () => {
