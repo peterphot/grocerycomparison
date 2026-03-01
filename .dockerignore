@@ -1,0 +1,12 @@
+node_modules
+.next
+dist
+*.pen
+.env
+.env.local
+.git
+e2e
+**/*.test.ts
+**/*.spec.ts
+**/vitest.config.ts
+playwright.config.ts
