@@ -13,6 +13,7 @@ import { ColesSessionManager } from './utils/coles-session.js';
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(cors({ origin: config.frontendOrigin }));
 app.use(express.json());
 
