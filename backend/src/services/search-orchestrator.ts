@@ -57,16 +57,42 @@ export class SearchOrchestrator {
     }
 
     // Fan out: for each adapter, search items with per-adapter concurrency limit
+    const storeErrors: Record<string, string> = {};
+
     const adapterResults = await Promise.allSettled(
       this.adapters.map(async (adapter) => {
         const limit = pLimit(config.maxConcurrentPerStore);
         const settled = await Promise.allSettled(
           items.map((item) => limit(() => adapter.searchProduct(item.name)))
         );
+
+        // Check for per-item failures within this adapter
+        const failures = settled.filter((r) => r.status === 'rejected');
+        if (failures.length > 0) {
+          // Use the first failure message as the store error
+          const firstFailure = failures[0] as PromiseRejectedResult;
+          const errorMessage = firstFailure.reason instanceof Error
+            ? firstFailure.reason.message
+            : String(firstFailure.reason);
+          storeErrors[adapter.storeName] = errorMessage;
+        }
+
         const itemResults = settled.map((r) => (r.status === 'fulfilled' ? r.value : []));
         return { adapter, itemResults };
       })
     );
+
+    // Capture adapter-level errors (when entire adapter promise rejects)
+    for (let i = 0; i < adapterResults.length; i++) {
+      const adapterResult = adapterResults[i];
+      if (adapterResult.status === 'rejected') {
+        const adapter = this.adapters[i];
+        const errorMessage = adapterResult.reason instanceof Error
+          ? adapterResult.reason.message
+          : String(adapterResult.reason);
+        storeErrors[adapter.storeName] = errorMessage;
+      }
+    }
 
     // Build ItemSearchResult[] from the adapter results
     const searchResults: ItemSearchResult[] = items.map((item, itemIndex) => {
@@ -95,6 +121,11 @@ export class SearchOrchestrator {
     });
 
     const response = buildComparisonResponse(searchResults);
+
+    // Include storeErrors only when there are actual errors
+    if (Object.keys(storeErrors).length > 0) {
+      response.storeErrors = storeErrors;
+    }
 
     // Evict expired entries before inserting
     const now = Date.now();

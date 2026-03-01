@@ -33,4 +33,5 @@ export interface MixAndMatchResult {
 export interface ComparisonResponse {
   storeTotals: StoreTotal[];
   mixAndMatch: MixAndMatchResult;
+  storeErrors?: Record<string, string>;
 }
