@@ -19,7 +19,8 @@ describe('AldiAdapter', () => {
 
     const results = await adapter.searchProduct('milk');
 
-    expect(results).toHaveLength(4);
+    // Category filter keeps only "Milk" subcategory items (2 of 5)
+    expect(results).toHaveLength(2);
     expect(results[0].store).toBe('aldi');
     expect(results[0].productName).toBe('Farmdale Full Cream Milk 2L');
     expect(results[0].brand).toBe('FARMDALE');
@@ -36,13 +37,30 @@ describe('AldiAdapter', () => {
     const results = await adapter.searchProduct('milk');
 
     expect(results[0].price).toBe(2.69);
-    expect(results[1].price).toBe(2.15);
+    expect(results[1].price).toBe(1.65);
   });
 
   it('includes products regardless of notForSale flag (price comparison only)', async () => {
+    // Use a fixture where all products share the same subcategory so filtering keeps them all
+    const fixture = {
+      data: [
+        {
+          sku: '001', name: 'Milk 2L', brandName: 'FARM', urlSlugText: 'milk-2l',
+          sellingSize: '2L', notForSale: false,
+          price: { amount: 269, amountRelevantDisplay: '$2.69', currencyCode: 'AUD' },
+          categories: [{ id: 'c1', name: 'Dairy' }, { id: 'c2', name: 'Milk' }],
+        },
+        {
+          sku: '002', name: 'Milk Frother', brandName: 'EXPRESSI', urlSlugText: 'milk-frother',
+          sellingSize: null, notForSale: true,
+          price: { amount: 3199, amountRelevantDisplay: '$31.99', currencyCode: 'AUD' },
+          categories: [{ id: 'c1', name: 'Dairy' }, { id: 'c2', name: 'Milk' }],
+        },
+      ],
+    };
     server.use(
       http.get('https://api.aldi.com.au/v3/product-search', () => {
-        return HttpResponse.json(aldiMilkFixture);
+        return HttpResponse.json(fixture);
       }),
     );
 
@@ -81,6 +99,7 @@ describe('AldiAdapter', () => {
           sellingSize: null,
           notForSale: false,
           price: { amount: 500, amountRelevantDisplay: '$5.00', currencyCode: 'AUD' },
+          categories: [],
         },
       ],
     };
@@ -98,13 +117,30 @@ describe('AldiAdapter', () => {
   });
 
   it('sets unit fields to null when sellingSize is unparseable', async () => {
+    // Use a fixture where the unparseable item shares subcategory with another so it survives filtering
+    const fixture = {
+      data: [
+        {
+          sku: '001', name: 'Specialty Cheese Selection', brandName: 'EMPORIUM',
+          urlSlugText: 'cheese-selection', sellingSize: 'assorted', notForSale: false,
+          price: { amount: 899, amountRelevantDisplay: '$8.99', currencyCode: 'AUD' },
+          categories: [{ id: 'c1', name: 'Dairy' }, { id: 'c2', name: 'Cheese' }],
+        },
+        {
+          sku: '002', name: 'Cheddar Block 500g', brandName: 'WESTACRE',
+          urlSlugText: 'cheddar-block', sellingSize: '500g', notForSale: false,
+          price: { amount: 499, amountRelevantDisplay: '$4.99', currencyCode: 'AUD' },
+          categories: [{ id: 'c1', name: 'Dairy' }, { id: 'c2', name: 'Cheese' }],
+        },
+      ],
+    };
     server.use(
       http.get('https://api.aldi.com.au/v3/product-search', () => {
-        return HttpResponse.json(aldiMilkFixture);
+        return HttpResponse.json(fixture);
       }),
     );
 
-    const results = await adapter.searchProduct('milk');
+    const results = await adapter.searchProduct('cheese');
 
     // "assorted" is unparseable
     const cheese = results.find(r => r.productName === 'Specialty Cheese Selection');
@@ -142,7 +178,7 @@ describe('AldiAdapter', () => {
       'https://www.aldi.com.au/product/farmdale-full-cream-milk-2l-000000000000567890',
     );
     expect(results[1].productUrl).toBe(
-      'https://www.aldi.com.au/product/farmdale-thickened-cream-300ml-000000000000567891',
+      'https://www.aldi.com.au/product/farmdale-light-milk-1l-000000000000567893',
     );
   });
 
@@ -189,5 +225,151 @@ describe('AldiAdapter', () => {
 
     expect(error).toBeInstanceOf(StoreApiError);
     expect((error as StoreApiError).store).toBe('aldi');
+  });
+
+  describe('category filtering', () => {
+    it('filters out products from different subcategory than top result', async () => {
+      server.use(
+        http.get('https://api.aldi.com.au/v3/product-search', () => {
+          return HttpResponse.json(aldiMilkFixture);
+        }),
+      );
+
+      const results = await adapter.searchProduct('milk');
+      const names = results.map(r => r.productName);
+
+      // Only "Milk" subcategory items survive (matches top result's subcategory)
+      expect(names).toContain('Farmdale Full Cream Milk 2L');
+      expect(names).toContain('Farmdale Light Milk 1L');
+      // Different subcategories filtered out
+      expect(names).not.toContain('Milk Frother');
+      expect(names).not.toContain('Farmdale Thickened Cream 300ml');
+      expect(names).not.toContain('Specialty Cheese Selection');
+    });
+
+    it('falls back to parent category when subcategory yields <=1 result', async () => {
+      const fixture = {
+        data: [
+          {
+            sku: '001', name: 'Thickened Cream 300ml', brandName: 'FARM',
+            urlSlugText: 'cream-300ml', sellingSize: '300ml', notForSale: false,
+            price: { amount: 215, amountRelevantDisplay: '$2.15', currencyCode: 'AUD' },
+            categories: [{ id: 'c1', name: 'Dairy, Eggs & Fridge' }, { id: 'c2', name: 'Cream & Custard' }],
+          },
+          {
+            sku: '002', name: 'Camembert 200g', brandName: 'EMPORIUM',
+            urlSlugText: 'camembert-200g', sellingSize: '200g', notForSale: false,
+            price: { amount: 399, amountRelevantDisplay: '$3.99', currencyCode: 'AUD' },
+            categories: [{ id: 'c1', name: 'Dairy, Eggs & Fridge' }, { id: 'c3', name: 'Cheese' }],
+          },
+          {
+            sku: '003', name: 'Chocolate Bar 100g', brandName: 'CHOCEUR',
+            urlSlugText: 'choc-bar', sellingSize: '100g', notForSale: false,
+            price: { amount: 199, amountRelevantDisplay: '$1.99', currencyCode: 'AUD' },
+            categories: [{ id: 'c4', name: 'Confectionery' }, { id: 'c5', name: 'Chocolate' }],
+          },
+        ],
+      };
+      server.use(
+        http.get('https://api.aldi.com.au/v3/product-search', () => {
+          return HttpResponse.json(fixture);
+        }),
+      );
+
+      const results = await adapter.searchProduct('cream');
+      const names = results.map(r => r.productName);
+
+      // Subcategory "Cream & Custard" has only 1 result → broadens to "Dairy, Eggs & Fridge"
+      expect(names).toContain('Thickened Cream 300ml');
+      expect(names).toContain('Camembert 200g');
+      // Different parent category filtered out
+      expect(names).not.toContain('Chocolate Bar 100g');
+    });
+
+    it('falls back to top 3 when parent category also yields <=1 result', async () => {
+      const fixture = {
+        data: [
+          {
+            sku: '001', name: 'Product A', brandName: 'BRAND',
+            urlSlugText: 'product-a', sellingSize: '100g', notForSale: false,
+            price: { amount: 100, amountRelevantDisplay: '$1.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c1', name: 'Category A' }, { id: 'c2', name: 'Sub A' }],
+          },
+          {
+            sku: '002', name: 'Product B', brandName: 'BRAND',
+            urlSlugText: 'product-b', sellingSize: '200g', notForSale: false,
+            price: { amount: 200, amountRelevantDisplay: '$2.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c3', name: 'Category B' }, { id: 'c4', name: 'Sub B' }],
+          },
+          {
+            sku: '003', name: 'Product C', brandName: 'BRAND',
+            urlSlugText: 'product-c', sellingSize: '300g', notForSale: false,
+            price: { amount: 300, amountRelevantDisplay: '$3.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c5', name: 'Category C' }, { id: 'c6', name: 'Sub C' }],
+          },
+          {
+            sku: '004', name: 'Product D', brandName: 'BRAND',
+            urlSlugText: 'product-d', sellingSize: '400g', notForSale: false,
+            price: { amount: 400, amountRelevantDisplay: '$4.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c7', name: 'Category D' }, { id: 'c8', name: 'Sub D' }],
+          },
+        ],
+      };
+      server.use(
+        http.get('https://api.aldi.com.au/v3/product-search', () => {
+          return HttpResponse.json(fixture);
+        }),
+      );
+
+      const results = await adapter.searchProduct('product');
+
+      // All unique categories → subcategory filter yields 1, parent filter yields 1 → top 3 fallback
+      expect(results).toHaveLength(3);
+      expect(results[0].productName).toBe('Product A');
+      expect(results[1].productName).toBe('Product B');
+      expect(results[2].productName).toBe('Product C');
+    });
+
+    it('returns top 3 when top product has no categories', async () => {
+      const fixture = {
+        data: [
+          {
+            sku: '001', name: 'No Cat Item', brandName: 'BRAND',
+            urlSlugText: 'no-cat', sellingSize: '100g', notForSale: false,
+            price: { amount: 100, amountRelevantDisplay: '$1.00', currencyCode: 'AUD' },
+            categories: [],
+          },
+          {
+            sku: '002', name: 'Item B', brandName: 'BRAND',
+            urlSlugText: 'item-b', sellingSize: '200g', notForSale: false,
+            price: { amount: 200, amountRelevantDisplay: '$2.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c1', name: 'Cat' }, { id: 'c2', name: 'Sub' }],
+          },
+          {
+            sku: '003', name: 'Item C', brandName: 'BRAND',
+            urlSlugText: 'item-c', sellingSize: '300g', notForSale: false,
+            price: { amount: 300, amountRelevantDisplay: '$3.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c1', name: 'Cat' }, { id: 'c2', name: 'Sub' }],
+          },
+          {
+            sku: '004', name: 'Item D', brandName: 'BRAND',
+            urlSlugText: 'item-d', sellingSize: '400g', notForSale: false,
+            price: { amount: 400, amountRelevantDisplay: '$4.00', currencyCode: 'AUD' },
+            categories: [{ id: 'c1', name: 'Cat' }, { id: 'c2', name: 'Sub' }],
+          },
+        ],
+      };
+      server.use(
+        http.get('https://api.aldi.com.au/v3/product-search', () => {
+          return HttpResponse.json(fixture);
+        }),
+      );
+
+      const results = await adapter.searchProduct('item');
+
+      // Top product has no categories → falls back to top 3
+      expect(results).toHaveLength(3);
+      expect(results[0].productName).toBe('No Cat Item');
+    });
   });
 });
