@@ -1,5 +1,5 @@
 {
-  "meta": { "pagination": { "offset": 0, "limit": 12, "totalCount": 3 } },
+  "meta": { "pagination": { "offset": 0, "limit": 12, "totalCount": 5 } },
   "data": [
     {
       "sku": "000000000000567890",
@@ -8,7 +8,11 @@
       "urlSlugText": "farmdale-full-cream-milk-2l",
       "sellingSize": "2L",
       "notForSale": false,
-      "price": { "amount": 269, "amountRelevantDisplay": "$2.69", "currencyCode": "AUD" }
+      "price": { "amount": 269, "amountRelevantDisplay": "$2.69", "currencyCode": "AUD" },
+      "categories": [
+        { "id": "cat-dairy", "name": "Dairy, Eggs & Fridge" },
+        { "id": "cat-milk", "name": "Milk" }
+      ]
     },
     {
       "sku": "000000000000567891",
@@ -17,7 +21,24 @@
       "urlSlugText": "farmdale-thickened-cream-300ml",
       "sellingSize": "300ml",
       "notForSale": false,
-      "price": { "amount": 215, "amountRelevantDisplay": "$2.15", "currencyCode": "AUD" }
+      "price": { "amount": 215, "amountRelevantDisplay": "$2.15", "currencyCode": "AUD" },
+      "categories": [
+        { "id": "cat-dairy", "name": "Dairy, Eggs & Fridge" },
+        { "id": "cat-cream", "name": "Cream & Custard" }
+      ]
+    },
+    {
+      "sku": "000000000000567893",
+      "name": "Farmdale Light Milk 1L",
+      "brandName": "FARMDALE",
+      "urlSlugText": "farmdale-light-milk-1l",
+      "sellingSize": "1L",
+      "notForSale": false,
+      "price": { "amount": 165, "amountRelevantDisplay": "$1.65", "currencyCode": "AUD" },
+      "categories": [
+        { "id": "cat-dairy", "name": "Dairy, Eggs & Fridge" },
+        { "id": "cat-milk", "name": "Milk" }
+      ]
     },
     {
       "sku": "000000000000545135",
@@ -26,7 +47,11 @@
       "urlSlugText": "expressi-milk-frother",
       "sellingSize": null,
       "notForSale": true,
-      "price": { "amount": 3199, "amountRelevantDisplay": "$31.99", "currencyCode": "AUD" }
+      "price": { "amount": 3199, "amountRelevantDisplay": "$31.99", "currencyCode": "AUD" },
+      "categories": [
+        { "id": "cat-appliances", "name": "Kitchen & Home" },
+        { "id": "cat-small-appliances", "name": "Small Appliances" }
+      ]
     },
     {
       "sku": "000000000000567892",
@@ -35,7 +60,11 @@
       "urlSlugText": "emporium-specialty-cheese-selection",
       "sellingSize": "assorted",
       "notForSale": false,
-      "price": { "amount": 899, "amountRelevantDisplay": "$8.99", "currencyCode": "AUD" }
+      "price": { "amount": 899, "amountRelevantDisplay": "$8.99", "currencyCode": "AUD" },
+      "categories": [
+        { "id": "cat-dairy", "name": "Dairy, Eggs & Fridge" },
+        { "id": "cat-cheese", "name": "Cheese" }
+      ]
     }
   ]
 }
