@@ -8,7 +8,7 @@ import { MixAndMatchColumn } from './MixAndMatchColumn';
 import { SummaryPanel } from './SummaryPanel';
 import { SavingsTip } from './SavingsTip';
 import { formatPrice, findCheapestStore } from '../../lib/utils';
-import { STORE_COLORS, type StoreColorKey } from '../../lib/store-colors';
+import { STORE_COLORS, STORE_DISPLAY_NAMES, type StoreColorKey } from '../../lib/store-colors';
 
 interface ComparisonResultsProps {
   response: ComparisonResponse;
@@ -52,10 +52,7 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
   }, [cheapestStore, response.storeTotals]);
 
   const tabs = useMemo<Array<{ key: TabKey; label: string }>>(
-    () => [
-      ...response.storeTotals.map((st) => ({ key: st.store, label: st.storeName })),
-      { key: 'mixandmatch', label: 'Mix & Match' },
-    ],
+    () => response.storeTotals.map((st) => ({ key: st.store, label: st.storeName })),
     [response.storeTotals],
   );
 
@@ -125,7 +122,7 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800"
             >
               <AlertTriangle size={16} className="text-amber-500 flex-shrink-0" />
-              <span className="capitalize font-medium">{store}:</span>
+              <span className="font-medium">{STORE_DISPLAY_NAMES[store as keyof typeof STORE_DISPLAY_NAMES] ?? store}:</span>
               <span>{message}</span>
             </div>
           ))}
@@ -161,12 +158,18 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               </button>
             );
           })}
-          {/* F5: Mix & Match pill shortcut showing total */}
+          {/* F5: Mix & Match pill (replaces standard Mix & Match tab) */}
           {!allUnavailable && (
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === 'mixandmatch'}
               onClick={() => setActiveTab('mixandmatch')}
-              className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-medium transition-colors bg-violet-600 text-white hover:bg-violet-700"
+              className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-medium transition-colors ${
+                activeTab === 'mixandmatch'
+                  ? 'bg-violet-100 text-violet-600'
+                  : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
             >
               Mix {formatPrice(response.mixAndMatch.total)}
             </button>

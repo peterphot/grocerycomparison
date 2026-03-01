@@ -107,7 +107,7 @@ describe('ComparisonResults', () => {
     expect(tabList).toHaveTextContent('Woolworths');
     expect(tabList).toHaveTextContent('Aldi');
     expect(tabList).toHaveTextContent('Harris Farm');
-    expect(tabList).toHaveTextContent('Mix & Match');
+    expect(tabList).toHaveTextContent(/Mix \$/);
   });
 
   it('switches visible store on mobile tab click', async () => {
@@ -426,12 +426,15 @@ describe('ComparisonResults store errors', () => {
   it('shows error message for stores with errors (B3)', () => {
     const responseWithErrors = {
       ...mockComparisonResponse,
-      storeErrors: { coles: 'Connection timeout', aldi: 'API error' },
+      storeErrors: { coles: 'Unable to fetch results from this store', aldi: 'Some items could not be fetched (1 of 3 failed)' },
     };
     render(<ComparisonResults response={responseWithErrors} />);
-    // Error messages should appear somewhere in the rendered output
-    expect(screen.getAllByText(/Connection timeout/).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/API error/).length).toBeGreaterThanOrEqual(1);
+    // Error messages should appear with proper store display names
+    expect(screen.getAllByText(/Unable to fetch results from this store/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Some items could not be fetched/).length).toBeGreaterThanOrEqual(1);
+    // Store names should use display names, not raw keys
+    expect(screen.getByText('Coles:')).toBeInTheDocument();
+    expect(screen.getByText('Aldi:')).toBeInTheDocument();
   });
 });
 

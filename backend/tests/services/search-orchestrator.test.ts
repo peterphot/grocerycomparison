@@ -167,7 +167,7 @@ describe('SearchOrchestrator', () => {
 
       expect(result).toHaveProperty('storeErrors');
       expect(result.storeErrors).toBeDefined();
-      expect(result.storeErrors!['coles']).toContain('coles is down');
+      expect(result.storeErrors!['coles']).toBe('Unable to fetch results from this store');
       expect(result.storeErrors!['woolworths']).toBeUndefined();
     });
 
@@ -183,8 +183,8 @@ describe('SearchOrchestrator', () => {
 
       const result = await orchestrator.search(items);
 
-      expect(result.storeErrors!['coles']).toBeDefined();
-      expect(result.storeErrors!['aldi']).toBeDefined();
+      expect(result.storeErrors!['coles']).toBe('Unable to fetch results from this store');
+      expect(result.storeErrors!['aldi']).toBe('Unable to fetch results from this store');
       expect(result.storeErrors!['woolworths']).toBeUndefined();
       expect(result.storeErrors!['harrisfarm']).toBeUndefined();
     });
@@ -245,6 +245,8 @@ describe('SearchOrchestrator', () => {
       const coles = result.storeTotals.find((st: any) => st.store === 'coles');
       expect(coles!.items[0].match).not.toBeNull(); // milk succeeded
       expect(coles!.items[1].match).toBeNull(); // bread failed
+      // Partial failure should show count in error message
+      expect(result.storeErrors!['coles']).toBe('Some items could not be fetched (1 of 2 failed)');
     });
 
     it('marks all items as unavailable for a failed store', async () => {

@@ -1,14 +1,7 @@
 import { memo } from 'react';
 import type { ProductMatch } from '@grocery/shared';
-import { STORE_COLORS, type StoreColorKey } from '../../lib/store-colors';
+import { STORE_COLORS, STORE_DISPLAY_NAMES, type StoreColorKey } from '../../lib/store-colors';
 import { formatPrice, formatUnitPrice } from '../../lib/utils';
-
-const STORE_LABELS: Record<string, string> = {
-  woolworths: 'Woolworths',
-  coles: 'Coles',
-  aldi: 'Aldi',
-  harrisfarm: 'Harris Farm',
-};
 
 interface ItemRowProps {
   match: ProductMatch | null;
@@ -44,7 +37,7 @@ export const ItemRow = memo(function ItemRow({ match, lineTotal, shoppingListIte
                 className="flex-shrink-0 text-[10px] font-medium text-white rounded px-1 py-0.5 leading-tight"
                 style={{ backgroundColor: STORE_COLORS[match.store as StoreColorKey] ?? '#6b7280' }}
               >
-                {STORE_LABELS[match.store] ?? match.store}
+                {STORE_DISPLAY_NAMES[match.store] ?? match.store}
               </span>
             )}
           </div>

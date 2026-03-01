@@ -1,7 +1,17 @@
 import type { ShoppingListItem, ComparisonResponse, ItemSearchResult, ProductMatch } from '@grocery/shared';
+import { StoreApiError } from '@grocery/shared';
 import type { StoreAdapter } from '../adapters/store-adapter.js';
 import { buildComparisonResponse } from './result-builder.js';
 import { config } from '../config.js';
+
+/** Map internal errors to safe user-facing messages. */
+function sanitizeStoreError(error: unknown): string {
+  if (error instanceof StoreApiError) {
+    if (error.statusCode && error.statusCode >= 500) return 'Store service temporarily unavailable';
+    if (error.message === 'Request timed out') return 'Store did not respond in time';
+  }
+  return 'Unable to fetch results from this store';
+}
 
 const MAX_CACHE_ENTRIES = 1000;
 
@@ -69,12 +79,12 @@ export class SearchOrchestrator {
         // Check for per-item failures within this adapter
         const failures = settled.filter((r) => r.status === 'rejected');
         if (failures.length > 0) {
-          // Use the first failure message as the store error
           const firstFailure = failures[0] as PromiseRejectedResult;
-          const errorMessage = firstFailure.reason instanceof Error
-            ? firstFailure.reason.message
-            : String(firstFailure.reason);
-          storeErrors[adapter.storeName] = errorMessage;
+          if (failures.length === settled.length) {
+            storeErrors[adapter.storeName] = sanitizeStoreError(firstFailure.reason);
+          } else {
+            storeErrors[adapter.storeName] = `Some items could not be fetched (${failures.length} of ${settled.length} failed)`;
+          }
         }
 
         const itemResults = settled.map((r) => (r.status === 'fulfilled' ? r.value : []));
@@ -87,10 +97,7 @@ export class SearchOrchestrator {
       const adapterResult = adapterResults[i];
       if (adapterResult.status === 'rejected') {
         const adapter = this.adapters[i];
-        const errorMessage = adapterResult.reason instanceof Error
-          ? adapterResult.reason.message
-          : String(adapterResult.reason);
-        storeErrors[adapter.storeName] = errorMessage;
+        storeErrors[adapter.storeName] = sanitizeStoreError(adapterResult.reason);
       }
     }
 
