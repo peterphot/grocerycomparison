@@ -124,6 +124,34 @@ describe('ComparisonResults', () => {
     expect(mobilePanel).toHaveTextContent('Woolworths Full Cream Milk 2L');
   });
 
+  it('defaults mobile tab to cheapest store (F7)', () => {
+    render(<ComparisonResults response={mockComparisonResponse} />);
+    const mobilePanel = screen.getByTestId('mobile-store-panel');
+    // Coles ($15.60) is cheapest fully-available store, should be default
+    expect(mobilePanel).toHaveTextContent('Coles Full Cream Milk 2L');
+  });
+
+  it('shows Mix & Match pill on mobile summary bar (F5)', () => {
+    render(<ComparisonResults response={mockComparisonResponse} />);
+    const mobileTabs = screen.getByTestId('mobile-store-tabs');
+    // Should have a purple Mix pill showing the Mix & Match total
+    expect(mobileTabs).toHaveTextContent(/Mix \$/);
+  });
+
+  it('clicking Mix pill switches to Mix & Match tab (F5)', async () => {
+    const user = userEvent.setup();
+    render(<ComparisonResults response={mockComparisonResponse} />);
+    const mobileTabs = screen.getByTestId('mobile-store-tabs');
+    const mixPill = Array.from(mobileTabs.querySelectorAll('button')).find(
+      (btn) => btn.textContent?.includes('Mix $'),
+    );
+    expect(mixPill).toBeDefined();
+    await user.click(mixPill!);
+    const mobilePanel = screen.getByTestId('mobile-store-panel');
+    // Should show Mix & Match content after clicking
+    expect(mobilePanel).toHaveTextContent('Farmdale Milk 2L');
+  });
+
   it('renders SummaryPanel when items and onEditList are provided (C2)', () => {
     const items = [
       { id: '1', name: 'milk 2L', quantity: 1, isBrandSpecific: false },

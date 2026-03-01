@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
 import type { ComparisonResponse, ShoppingListItem } from '@grocery/shared';
 import { StoreColumn } from './StoreColumn';
@@ -19,6 +19,8 @@ interface ComparisonResultsProps {
 type TabKey = StoreColorKey;
 
 export function ComparisonResults({ response, items, onEditList }: ComparisonResultsProps) {
+  const mixMatchRef = useRef<HTMLDivElement>(null);
+
   // All hooks called unconditionally (Rules of Hooks)
   const cheapestStore = useMemo(
     () => findCheapestStore(response.storeTotals),
@@ -37,13 +39,17 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
 
   const columnCount = response.storeTotals.length + 1;
 
-  const [activeTab, setActiveTab] = useState<TabKey>(
-    response.storeTotals[0]?.store ?? 'mixandmatch',
+  // F7: Default mobile tab to cheapest store
+  const defaultTab = useMemo<TabKey>(
+    () => cheapestStore?.store ?? response.storeTotals[0]?.store ?? 'mixandmatch',
+    [cheapestStore, response.storeTotals],
   );
 
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultTab);
+
   useEffect(() => {
-    setActiveTab(response.storeTotals[0]?.store ?? 'mixandmatch');
-  }, [response.storeTotals]);
+    setActiveTab(cheapestStore?.store ?? response.storeTotals[0]?.store ?? 'mixandmatch');
+  }, [cheapestStore, response.storeTotals]);
 
   const tabs = useMemo<Array<{ key: TabKey; label: string }>>(
     () => [
@@ -68,6 +74,14 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
     [columnCount],
   );
 
+  // F4: Handler for Save with Mix & Match CTA
+  const handleSavingsClick = () => {
+    // Mobile: switch to Mix & Match tab
+    setActiveTab('mixandmatch');
+    // Desktop: scroll to Mix & Match column
+    mixMatchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
   // Early return after all hooks
   if (response.storeTotals.length === 0 || !cheapestStore) return null;
 
@@ -91,9 +105,13 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
             Best mix &amp; match: {formatPrice(response.mixAndMatch.total)}
           </span>
           {mixMatchSavings > 0 && (
-            <span className="bg-green-100 text-green-700 text-xs font-medium rounded-full px-2.5 py-0.5 ml-auto">
-              Save {formatPrice(mixMatchSavings)} with mix &amp; match
-            </span>
+            <button
+              type="button"
+              onClick={handleSavingsClick}
+              className="bg-green-100 text-green-700 text-xs font-medium rounded-full px-2.5 py-0.5 ml-auto hover:bg-green-200 transition-colors cursor-pointer"
+            >
+              Save {formatPrice(mixMatchSavings)} with mix &amp; match &rarr;
+            </button>
           )}
         </div>
       )}
@@ -127,6 +145,16 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               </button>
             );
           })}
+          {/* F5: Mix & Match pill shortcut showing total */}
+          {!allUnavailable && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('mixandmatch')}
+              className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-medium transition-colors bg-violet-600 text-white hover:bg-violet-700"
+            >
+              Mix {formatPrice(response.mixAndMatch.total)}
+            </button>
+          )}
         </div>
         <div data-testid="mobile-store-panel">
           {activeTab === 'mixandmatch' ? (
@@ -161,7 +189,9 @@ export function ComparisonResults({ response, items, onEditList }: ComparisonRes
               isCheapest={storeTotal.store === cheapestStore.store}
             />
           ))}
-          <MixAndMatchColumn mixAndMatch={response.mixAndMatch} />
+          <div ref={mixMatchRef}>
+            <MixAndMatchColumn mixAndMatch={response.mixAndMatch} />
+          </div>
         </div>
       </div>
     </div>
